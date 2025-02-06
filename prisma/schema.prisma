@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Replace with your database connection URL
+}
+
+model User {
+  id                          Int      @id @default(autoincrement())
+  name                        String?
+  surname                     String?
+  email                       String?  @unique
+  password                    String?
+  role                        String?
+  gender                      Gender?
+  title                       String?
+  phone                       String?
+  profile_image               String?
+  latest_time_for_appointment Int?
+  description                 String?
+  check_up_status             String?  @map("check_up_status")
+  status                      Boolean
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  educations               Education[]
+  certificates             Certificate[]
+  expertKnowledges         ExpertKnowledge[]
+  weeklyCalendars          WeeklyCalendar[]
+  consultantExpertiseLinks ConsultantExpertiseLink[]
+  packets                  Packet[]
+  billingInfos             BillingInfo[]
+  consultantAppointments   Appointment[]             @relation("ConsultantAppointments")
+  clientAppointments       Appointment[]             @relation("ClientAppointments")
+  meetingOptions           MeetingOption[]
+  languages                Language[]
+}
+
+model Education {
+  education_id       Int       @id @default(autoincrement())
+  university_name    String?
+  educational_degree String?
+  department         String?
+  start_date         DateTime?
+  end_date           DateTime?
+  status             Boolean
+  consultant         User      @relation(fields: [consultant_id], references: [id])
+  consultant_id      Int
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Certificate {
+  certificate_id       Int       @id @default(autoincrement())
+  certificate_name     String?
+  issuing_organization String?
+  given_date           DateTime?
+  status               Boolean
+  consultant           User      @relation(fields: [consultant_id], references: [id])
+  consultant_id        Int
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model ExpertKnowledge {
+  expert_knowledge_id Int      @id @default(autoincrement())
+  consultant          User     @relation(fields: [consultant_id], references: [id])
+  consultant_id       Int
+  status              Boolean
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ConsultantExpertiseLink {
+  id            Int       @id @default(autoincrement())
+  consultant    User      @relation(fields: [consultant_id], references: [id])
+  consultant_id Int
+  expertise     Expertise @relation(fields: [expertise_id], references: [expertise_id])
+  expertise_id  Int
+  workspaces    Json?
+}
+
+model Expertise {
+  expertise_id Int                       @id @default(autoincrement())
+  name         String?
+  image        String?
+  status       Boolean
+  links        ConsultantExpertiseLink[]
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+}
+
+model Workspace {
+  workspace_id Int      @id @default(autoincrement())
+  name         String?
+  status       Boolean
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WeeklyCalendar {
+  weekly_calendar_id Int      @id @default(autoincrement())
+  day_and_hours      Json?
+  status             Boolean
+  consultant         User     @relation(fields: [consultant_id], references: [id])
+  consultant_id      Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Packet {
+  packet_id           Int           @id @default(autoincrement())
+  packet_type         PacketType?
+  packet_title        String?
+  packet_minutes      Int?
+  meeting_times       Int?
+  price               Decimal       @db.Decimal(10, 2)
+  discounted_price    Decimal       @db.Decimal(10, 2)
+  meeting_description String?
+  pre_questions       String?       @db.Text
+  status              Boolean       @default(true)
+  consultant          User          @relation(fields: [consultant_id], references: [id])
+  consultant_id       Int
+  appointments        Appointment[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model BillingInfo {
+  bill_id       Int      @id @default(autoincrement())
+  name          String?
+  surname       String?
+  iban          String?
+  tckn          String?
+  address       String?
+  city          String?
+  district      String?
+  status        Boolean
+  consultant    User     @relation(fields: [consultant_id], references: [id])
+  consultant_id Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Appointment {
+  appointment_id Int      @id @default(autoincrement())
+  date_time      DateTime
+  packet         Packet   @relation(fields: [packet_id], references: [packet_id])
+  packet_id      Int
+  consultant     User     @relation("ConsultantAppointments", fields: [consultant_id], references: [id])
+  consultant_id  Int
+  client         User     @relation("ClientAppointments", fields: [client_id], references: [id])
+  client_id      Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model MeetingOption {
+  id        Int     @id @default(autoincrement())
+  name      String?
+  user      User    @relation(fields: [user_id], references: [id])
+  user_id   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+// hizmet verdiği diller
+model Language {
+  id        Int     @id @default(autoincrement())
+  name      String?
+  user      User    @relation(fields: [user_id], references: [id])
+  user_id   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum PacketType {
+  FREE
+  STARTUP
+  PACKAGE
+}
