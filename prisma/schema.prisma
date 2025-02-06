@@ -12,7 +12,9 @@ model User {
   name                        String?
   surname                     String?
   email                       String?  @unique
+  emailVerified               DateTime?
   password                    String?
+  sessionVersion              Int       @default(1)
   role                        String?
   gender                      Gender?
   title                       String?
@@ -22,14 +24,17 @@ model User {
   description                 String?
   check_up_status             String?  @map("check_up_status")
   status                      Boolean
+  deletedAt                   DateTime?
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
+  logs                        Log[]
 
   educations               Education[]
   certificates             Certificate[]
   expertKnowledges         ExpertKnowledge[]
   weeklyCalendars          WeeklyCalendar[]
   consultantExpertiseLinks ConsultantExpertiseLink[]
+  workspaceLinks           WorkspaceExpertiseLink[]
   packets                  Packet[]
   billingInfos             BillingInfo[]
   consultantAppointments   Appointment[]             @relation("ConsultantAppointments")
@@ -48,6 +53,7 @@ model Education {
   status             Boolean
   consultant         User      @relation(fields: [consultant_id], references: [id])
   consultant_id      Int
+  deletedAt          DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 }
@@ -60,6 +66,7 @@ model Certificate {
   status               Boolean
   consultant           User      @relation(fields: [consultant_id], references: [id])
   consultant_id        Int
+  deletedAt            DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }
@@ -69,6 +76,7 @@ model ExpertKnowledge {
   consultant          User     @relation(fields: [consultant_id], references: [id])
   consultant_id       Int
   status              Boolean
+  deletedAt           DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
@@ -79,6 +87,7 @@ model ConsultantExpertiseLink {
   consultant_id Int
   expertise     Expertise @relation(fields: [expertise_id], references: [expertise_id])
   expertise_id  Int
+  deletedAt     DateTime?
   workspaces    Json?
 }
 
@@ -88,6 +97,8 @@ model Expertise {
   image        String?
   status       Boolean
   links        ConsultantExpertiseLink[]
+  workspaceLinks WorkspaceExpertiseLink[]
+  deletedAt    DateTime?
   createdAt    DateTime                  @default(now())
   updatedAt    DateTime                  @updatedAt
 }
@@ -96,8 +107,23 @@ model Workspace {
   workspace_id Int      @id @default(autoincrement())
   name         String?
   status       Boolean
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  links        WorkspaceExpertiseLink[]
+}
+
+model WorkspaceExpertiseLink {
+  id            Int       @id @default(autoincrement())
+  consultant    User      @relation(fields: [consultant_id], references: [id])
+  consultant_id Int
+  workspace     Workspace @relation(fields: [workspace_id], references: [workspace_id])
+  workspace_id  Int
+  expertise     Expertise @relation(fields: [expertise_id], references: [expertise_id])
+  expertise_id  Int
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model WeeklyCalendar {
@@ -106,6 +132,7 @@ model WeeklyCalendar {
   status             Boolean
   consultant         User     @relation(fields: [consultant_id], references: [id])
   consultant_id      Int
+  deletedAt          DateTime?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -124,6 +151,7 @@ model Packet {
   consultant          User          @relation(fields: [consultant_id], references: [id])
   consultant_id       Int
   appointments        Appointment[]
+  deletedAt           DateTime?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 }
@@ -140,6 +168,7 @@ model BillingInfo {
   status        Boolean
   consultant    User     @relation(fields: [consultant_id], references: [id])
   consultant_id Int
+  deletedAt     DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -153,6 +182,7 @@ model Appointment {
   consultant_id  Int
   client         User     @relation("ClientAppointments", fields: [client_id], references: [id])
   client_id      Int
+  deletedAt      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -162,6 +192,7 @@ model MeetingOption {
   name      String?
   user      User    @relation(fields: [user_id], references: [id])
   user_id   Int
+  deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -171,6 +202,7 @@ model Language {
   name      String?
   user      User    @relation(fields: [user_id], references: [id])
   user_id   Int
+  deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -185,4 +217,72 @@ enum PacketType {
   FREE
   STARTUP
   PACKAGE
+}
+
+model Menu {
+  id        Int    @id @default(autoincrement())
+  parentId  Int?
+  title     String
+  type      MenuType
+  page_path String?
+  categoryId Int?
+  parent    Menu?     @relation("MenuToMenu", fields: [parentId], references: [id])
+  children  Menu[]    @relation("MenuToMenu")
+  category  Category? @relation("ParentMenu", fields: [categoryId], references: [id])
+  categories Category[] @relation("MenuCategories")
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum MenuType {
+  DropDown
+  BlankMenu
+  Relation
+}
+
+model Category {
+  id        Int    @id @default(autoincrement())
+  menuId    Int
+  title     String
+  page_path String?
+  image     String?
+  menu      Menu      @relation("MenuCategories", fields: [menuId], references: [id], onDelete: Cascade)
+  parentMenus Menu[]  @relation("ParentMenu")
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Slider {
+  id          Int      @id @default(autoincrement())
+  title       String?
+  description String?
+  image       String?
+  mobileImage String?
+  status      Boolean  @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum LogType {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  ERROR
+}
+
+model Log {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id])
+  type        LogType
+  action      String
+  description String?  @db.Text
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
 }

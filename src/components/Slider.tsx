@@ -6,59 +6,29 @@ import "swiper/css/pagination";
 
 import {Autoplay, Navigation, Pagination, Thumbs} from "swiper/modules";
 import Image from "next/image";
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import { getActiveSliders } from "@/app/(home)/action";
+
+interface Slider {
+    id: number;
+    title: string | null;
+    description: string | null;
+    image: string | null;
+    mobileImage: string | null;
+    status: boolean;
+}
 
 export default function Slider() {
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
-    const sliderData = [
-        {
-            image: "/assets/images/slider1.jpg",
-            title: "Uzman Psikolog",
-            description: "Size uygun danışmanlar ile iletişim kurun.",
-            width: 1800,
-            height: 600,
-        },
-        {
-            image: "/slider2.jpg",
-            title: "Aile Danışmanı",
-            description: "Aileniz için en iyi çözümleri bulun.",
-            width: 1800,
-            height: 600,
-        },
-        {
-            image: "/slider3.jpg",
-            title: "Astrolog",
-            description: "Uzman astrologlardan profesyonel hizmet alın.",
-            width: 1800,
-            height: 600,
-        },
-    ];
-    const mobileSliderData = [
-        {
-            image: "/assets/images/mobile-slider1.jpeg",
-            title: "Uzman Psikolog",
-            description: "Size uygun danışmanlar ile iletişim kurun.",
-            width: 1200,
-            height: 1350,
-        },
-        {
-            image: "/slider2.jpg",
-            title: "Aile Danışmanı",
-            description: "Aileniz için en iyi çözümleri bulun.",
-            width: 1200,
-            height: 1350,
-        },
-        {
-            image: "/slider3.jpg",
-            title: "Astrolog",
-            description: "Uzman astrologlardan profesyonel hizmet alın.",
-            width: 1200,
-            height: 1350,
-        },
-    ];
+    const [sliders, setSliders] = useState<Slider[]>([]);
+
+    useEffect(() => {
+        getActiveSliders().then(setSliders).catch(console.error);
+    }, []);
+
     return (
         <div className="bg-gray-50">
-            <div className="hidden md:block">
+            <div className="hidden md:block h-[625px]">
                 <Swiper
                     style={{
                         // @ts-ignore
@@ -71,28 +41,41 @@ export default function Slider() {
                     thumbs={{swiper: thumbsSwiper}}
                     pagination={{clickable: true}}
                     modules={[Navigation, Pagination, Thumbs, Autoplay]}
-                    className="mySwiper"
+                    className="w-full h-full"
                     autoplay={{
                         delay: 4700,
                         disableOnInteraction: false,
                     }}
                 >
-                    {sliderData.map((slide, index) => (
-                        <SwiperSlide key={index}>
-                            <div className="flex flex-col items-center text-center">
+                    {sliders.map((slider) => (
+                        <SwiperSlide key={slider.id}>
+                            <div className="relative w-full h-full">
                                 <Image
-                                    src={slide.image}
-                                    alt={slide.title}
-                                    width={slide.width}
-                                    height={slide.height}
-                                    className="w-full object-cover rounded-lg"
+                                    src={slider.image || "/assets/images/default-slider.jpg"}
+                                    alt={slider.title || ""}
+                                    fill
+                                    className="object-cover w-full h-full"
+                                    priority
+                                    sizes="100vw"
+                                    quality={100}
+                                    loading="eager"
+                                    unoptimized
+                                    fetchPriority="high"
+                                    placeholder="blur"
+                                    blurDataURL={slider.image || "/assets/images/default-slider.jpg"}
                                 />
+                                {(slider.title || slider.description) && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center text-white text-center p-4 z-10">
+                                        {slider.title && <h2 className="text-4xl font-bold mb-4">{slider.title}</h2>}
+                                        {slider.description && <p className="text-xl">{slider.description}</p>}
+                                    </div>
+                                )}
                             </div>
                         </SwiperSlide>
                     ))}
                 </Swiper>
             </div>
-            <div className="md:hidden">
+            <div className="md:hidden h-[700px]">
                 <Swiper
                     style={{
                         // @ts-ignore
@@ -105,23 +88,35 @@ export default function Slider() {
                     thumbs={{swiper: thumbsSwiper}}
                     pagination={{clickable: true}}
                     modules={[Navigation, Pagination, Thumbs, Autoplay]}
-                    className="mySwiper"
+                    className="w-full h-full"
                     autoplay={{
                         delay: 4700,
                         disableOnInteraction: false,
                     }}
                 >
-                    {mobileSliderData.map((slide, index) => (
-                        <SwiperSlide key={index}>
-                            <div className="flex flex-col items-center text-center">
+                    {sliders.map((slider) => (
+                        <SwiperSlide key={slider.id}>
+                            <div className="relative w-full h-full">
                                 <Image
-                                    src={slide.image}
-                                    alt={slide.title}
-                                    objectFit={"cover"}
-                                    width={slide.width}
-                                    height={slide.height}
-                                    className="w-full object-cover rounded-lg"
+                                    src={slider.mobileImage || slider.image || "/assets/images/default-slider.jpg"}
+                                    alt={slider.title || ""}
+                                    fill
+                                    className="object-cover w-full h-full"
+                                    priority
+                                    sizes="100vw"
+                                    quality={100}
+                                    loading="eager"
+                                    unoptimized
+                                    fetchPriority="high"
+                                    placeholder="blur"
+                                    blurDataURL={slider.mobileImage || slider.image || "/assets/images/default-slider.jpg"}
                                 />
+                                {(slider.title || slider.description) && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-center p-4">
+                                        {slider.title && <h2 className="text-4xl font-bold mb-4">{slider.title}</h2>}
+                                        {slider.description && <p className="text-xl">{slider.description}</p>}
+                                    </div>
+                                )}
                             </div>
                         </SwiperSlide>
                     ))}

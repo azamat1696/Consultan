@@ -5,7 +5,7 @@ import prisma from '@/lib/db'; // Import your Prisma client
 export const authOptions = {
     session: {
         strategy: 'jwt',
-        maxAge: 24 * 60 * 60, // 1 day
+        maxAge: 1 * 60 * 60, //1hour
     },
     secret: process.env.NEXTAUTH_SECRET, // Use environment variable for secret
     pages: {
@@ -18,11 +18,18 @@ export const authOptions = {
             type: 'credentials',
             // @ts-ignore
             async authorize(credentials) {
-                // Find user by email
                 const user = await prisma.user.findFirst({
                     where: {
                         email: credentials?.email,
                     },
+                    select: {
+                        id: true,
+                        email: true,
+                        name: true,
+                        role: true,
+                        sessionVersion: true,
+                        password: true
+                    }
                 });
 
                 if (!user) {
@@ -40,8 +47,22 @@ export const authOptions = {
     callbacks: {
         async jwt({token, user}:{token:any,user:any}): Promise<any> {
             if(user){
-                token.user = user
+                token.user = user;
+                token.sessionVersion = user.sessionVersion;
             }
+
+            // Check session version
+            if (token?.user?.id) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: token.user.id },
+                    select: { sessionVersion: true }
+                });
+
+                if (dbUser && dbUser.sessionVersion !== token.sessionVersion) {
+                    return null; // Force sign out
+                }
+            }
+
             return token
         },
         async session({session,token}:{session:any,user:any,token:any}): Promise<any>{
