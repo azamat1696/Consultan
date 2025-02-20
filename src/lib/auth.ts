@@ -3,7 +3,7 @@ import { User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import prisma from '@/lib/db'
 import { comparePassword } from '@/lib/password'
-import { getServerSession } from 'next-auth'
+
 declare module 'next-auth' {
     interface User {
         id: number
@@ -62,6 +62,22 @@ export const authOptions: AuthOptions = {
             }
         })
     ],
+    callbacks: {
+        jwt: async ({ token, user }) => {
+            if (user) {
+                token.role = user.role
+                token.id = typeof user.id === 'string' ? parseInt(user.id) : user.id
+            }
+            return token
+        },
+        session: async ({ session, token }) => {
+            if (token) {
+                session.user.role = token.role
+                session.user.id = token.id
+            }
+            return session
+        }
+    },
     session: {
         strategy: "jwt"
     },
@@ -69,5 +85,3 @@ export const authOptions: AuthOptions = {
         signIn: '/signin'
     }
 }
-
-export const auth = getServerSession(authOptions)

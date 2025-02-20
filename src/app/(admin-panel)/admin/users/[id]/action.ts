@@ -9,7 +9,7 @@ import { createLog } from "@/lib/logger";
 import crypto from "crypto";
 import { hashPassword } from "@/lib/password";
 import { writeFile } from 'fs/promises'
-import { auth } from '@/lib/auth'
+import { Session } from 'next-auth'
 
 interface Expertise {
     expertise_id: number;
@@ -1068,8 +1068,8 @@ export async function uploadImage(imageData: string) {
 
 export async function uploadFile(formData: FormData) {
     try {
-        const session = await auth
-        if (!session || session.user.role !== 'admin') {
+        const session = await getServerSession(authOptions) as Session | null
+        if (session?.user?.role !== 'admin') {
             throw new Error('Unauthorized')
         }
 
