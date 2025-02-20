@@ -6,8 +6,7 @@ import {
     Divider,
     Button,
 } from "@heroui/react";
-import { Menu, Home, Calendar, Users, Package, User as UserIcon, Clock, MessageSquare, ShoppingCart, Bell, Settings, HelpCircle, ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
+import { Menu, Calendar, Package, User as UserIcon, Clock, MessageSquare, ShoppingCart, Settings, ArrowLeftIcon } from "lucide-react";
 import Certificates from "./components/Certificates";
 import Education from "./components/Education";
 import ExpertiseComponent from "./components/Expertise";
@@ -26,7 +25,7 @@ export default function Page() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const {id} = useParams();
     const idNumber = parseInt(id as string);
-    const [user, setUser] = useState <typeof User | null>(null);
+    const [user, setUser] = useState < User | null>(null);
     const router = useRouter();
   //  get user
   useEffect(() => {

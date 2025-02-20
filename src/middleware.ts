@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
+import prisma from './lib/db';
 
-const publicRoutes = ['/signin', '/kayit-ol', '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*']; // Define public routes
+const publicRoutes = ['/signin', '/kayit-ol', '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*','/kategoriler/*','/nasil-calisiyor','/hakkimizda']; // Define public routes
 const roleBasedRoutes = {
     admin: ['/admin'],
     consultant: ['/consultant'],
@@ -12,11 +13,18 @@ const roleBasedRoutes = {
 export default async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { pathname } = req.nextUrl;
-
-    // Public route handling
-    if (publicRoutes.some(route => pathname === route)) {
+    const pathnameArray = pathname.split('/');
+    const pathnameArrayWithoutSlash = pathnameArray.filter(p => p !== '');
+    // check if public routes
+    if (publicRoutes.some(route => route.split('/').filter(p => p !== '').join('/').includes(pathnameArrayWithoutSlash[0])) || publicRoutes.some(route => route === pathname)) {
         return NextResponse.next();
     }
+    
+     // check if pathname includes after slash star the acsept rest of route for example /kategoriler/psikoloji/* or /kategoriler/* and check if it is public route
+    //if (isPublicRoute(pathname)) {
+    //    return NextResponse.next();
+    //}
+
     // Redirect unauthenticated users to the sign-in page
     if (!token) {
         if (pathname !== '/signin') {

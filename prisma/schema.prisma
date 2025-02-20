@@ -16,6 +16,7 @@ model User {
   password                    String?
   sessionVersion              Int       @default(1)
   role                        String?
+  slug                        String?   @unique
   gender                      Gender?
   title                       String?
   phone                       String?
@@ -96,8 +97,10 @@ model Expertise {
   name         String?
   image        String?
   status       Boolean
+  slug         String?                   @unique
   links        ConsultantExpertiseLink[]
   workspaceLinks WorkspaceExpertiseLink[]
+  categoryLinks CategoryExpertiseLink[]
   deletedAt    DateTime?
   createdAt    DateTime                  @default(now())
   updatedAt    DateTime                  @updatedAt
@@ -106,11 +109,13 @@ model Expertise {
 model Workspace {
   workspace_id Int      @id @default(autoincrement())
   name         String?
-  status       Boolean
+  status       Boolean  @default(true)
+  slug         String?   @unique
   deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   links        WorkspaceExpertiseLink[]
+  categoryLinks CategoryWorkspaceLink[]
 }
 
 model WorkspaceExpertiseLink {
@@ -176,12 +181,14 @@ model BillingInfo {
 model Appointment {
   appointment_id Int      @id @default(autoincrement())
   date_time      DateTime
+  appointment_time String?
   packet         Packet   @relation(fields: [packet_id], references: [packet_id])
   packet_id      Int
   consultant     User     @relation("ConsultantAppointments", fields: [consultant_id], references: [id])
   consultant_id  Int
   client         User     @relation("ClientAppointments", fields: [client_id], references: [id])
   client_id      Int
+  status         AppointmentStatus?
   deletedAt      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -219,12 +226,20 @@ enum PacketType {
   PACKAGE
 }
 
+enum AppointmentStatus {
+  pending
+  cancelled
+  completed
+}
+
 model Menu {
   id        Int    @id @default(autoincrement())
   parentId  Int?
   title     String
   type      MenuType
   page_path String?
+  slug      String?
+  order_number Int?
   categoryId Int?
   parent    Menu?     @relation("MenuToMenu", fields: [parentId], references: [id])
   children  Menu[]    @relation("MenuToMenu")
@@ -246,12 +261,38 @@ model Category {
   menuId    Int
   title     String
   page_path String?
+  slug      String?   @unique
   image     String?
   menu      Menu      @relation("MenuCategories", fields: [menuId], references: [id], onDelete: Cascade)
+  categoryLinks CategoryWorkspaceLink[]
+  expertiseLinks CategoryExpertiseLink[]
   parentMenus Menu[]  @relation("ParentMenu")
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+model CategoryWorkspaceLink {
+  id Int @id @default(autoincrement())
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  workspace Workspace @relation(fields: [workspaceId], references: [workspace_id])
+  workspaceId Int
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([categoryId, workspaceId])
+}
+
+model CategoryExpertiseLink {
+  id Int @id @default(autoincrement())
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  expertise Expertise @relation(fields: [expertiseId], references: [expertise_id])
+  expertiseId Int
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([categoryId, expertiseId])
 }
 
 model Slider {

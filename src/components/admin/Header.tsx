@@ -4,11 +4,25 @@ import { signOut } from 'next-auth/react';
 import { User, Bell, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
+const MENU_ITEMS = [
+    { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/users', label: 'Kullanıcılar' },
+    { href: '/admin/menus', label: 'Menüler' },
+    { href: '/admin/categories', label: 'Kategoriler' },
+    { href: '/admin/sliders', label: 'Slider' },
+    { href: '/admin/workspaces', label: 'Çalışma Alanları' },
+    { href: '/admin/expertises', label: 'Uzmanlık Alanları' },
+    { href: '/admin/logs', label: 'Loglar' },
+];
+
 export default function AdminHeader() {
     const pathname = usePathname();
     
     const isActive = (path: string) => {
-        return pathname.startsWith(path) ? "text-red-600 border-b-2 border-red-600" : "";
+        if (path === '/admin') {
+            return pathname === '/admin' ? "text-red-600 border-b-2 border-red-600" : "";
+        }
+        return pathname.startsWith(path) && pathname !== '/admin' ? "text-red-600 border-b-2 border-red-600" : "";
     };
 
     return (
@@ -22,37 +36,17 @@ export default function AdminHeader() {
                         </Link>
                     </div>
                     <div className="flex items-center gap-4">
-                
-                        <Link 
-                            href="/admin/users" 
-                            className={`text-gray-600 hover:text-red-600 pb-1 ${isActive('/admin/users')}`}
-                        >
-                            Kullanıcılar
-                        </Link>
-                        <Link 
-                            href="/admin/sliders" 
-                            className={`text-gray-600 hover:text-red-600 pb-1 ${isActive('/admin/sliders')}`}
-                        >
-                            Sliderler
-                        </Link>
-                        <Link 
-                            href="/admin/categories" 
-                            className={`text-gray-600 hover:text-red-600 pb-1 ${isActive('/admin/categories')}`}
-                        >
-                            Kategoriler
-                        </Link>
-                        <Link 
-                            href="/admin/menus" 
-                            className={`text-gray-600 hover:text-red-600 pb-1 ${isActive('/admin/menus')}`}
-                        >
-                            Menüler
-                        </Link>
-                        <Link 
-                            href="/admin/logs" 
-                            className={`text-gray-600 hover:text-red-600 pb-1 ${isActive('/admin/logs')}`}
-                        >
-                            Loglar
-                        </Link>
+                       {
+                        MENU_ITEMS.map((item) => (
+                            <Link 
+                                key={item.href}
+                                href={item.href} 
+                                className={`text-gray-600 hover:text-red-600 pb-1 ${isActive(item.href)}`}
+                            >
+                                {item.label}
+                            </Link>
+                        ))
+                       }
                     </div>
 
                     {/* Right side */}

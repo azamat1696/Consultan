@@ -1,8 +1,11 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import prisma from '@/lib/db'; // Import your Prisma client
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { comparePassword } from "@/lib/password";
 
 export const authOptions = {
+    adapter: PrismaAdapter(prisma),
     session: {
         strategy: 'jwt',
         maxAge: 1 * 60 * 60, //1hour
@@ -36,7 +39,12 @@ export const authOptions = {
                     return null;
                 }
                 // @ts-ignore
-                if (user?.password !== credentials?.password) {
+                const isValid = await comparePassword(
+                    credentials?.password || '',
+                    user.password || ''
+                );
+                
+                if (!isValid) {
                     return null;
                 }
                 return user;

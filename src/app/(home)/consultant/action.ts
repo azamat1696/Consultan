@@ -9,6 +9,8 @@ import { User } from './types';
 import { Decimal } from '@prisma/client/runtime/library';
 import { PacketType } from '@prisma/client';
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import { generateSlug } from "@/lib/slug";
 
 interface Expertise {
     expertise_id: number;
@@ -78,6 +80,13 @@ export async function contactInfoRegister(formData: any) {
         }
     }
 
+    // Hash password if it exists
+    let hashedPassword = formData.password;
+    if (formData.password) {
+        const salt = await bcrypt.genSalt(10);
+        hashedPassword = await bcrypt.hash(formData.password, salt);
+    }
+
     const user = await prisma.user.update({
         where: {
             id: session.user.id,
@@ -87,8 +96,9 @@ export async function contactInfoRegister(formData: any) {
             surname: formData.surname,
             gender: formData.gender,
             email: formData.email,
-            password: formData.password,
+            password: hashedPassword,
             status: false,
+            slug: generateSlug(formData.name + ' ' + formData.surname),
             title: formData.title,
             phone: formData.phone,
             profile_image: imageUrl || formData.image || undefined

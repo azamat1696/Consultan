@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getPopularCategories } from "@/app/(home)/action";
-
+import Link from "next/link";
 interface Category {
     id: bigint;
     menuId: bigint;
@@ -12,6 +12,7 @@ interface Category {
     deletedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
+    slug: string | null;
 }
 
 export default function PopularCategories() {
@@ -20,7 +21,7 @@ export default function PopularCategories() {
     const [displayedCategories, setDisplayedCategories] = useState<Category[]>([]);
 
     useEffect(() => {
-        getPopularCategories().then(setCategories).catch(console.error);
+        getPopularCategories().then(setCategories as any).catch(console.error);
     }, []);
 
     useEffect(() => {
@@ -42,7 +43,7 @@ export default function PopularCategories() {
 
             <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                 {displayedCategories.map((category) => (
-                    <div key={category.id.toString()} className="bg-white rounded-xl drop-shadow px-5 py-5 flex flex-col items-center">
+                    <Link href={`/kategoriler/${category.slug}`} key={category.id.toString()} className="bg-white rounded-xl drop-shadow px-5 py-5 flex flex-col items-center cursor-pointer">
                         <Image
                             src={category?.image || "/assets/images/default-category.jpg"}
                             alt={category.title || ""}
@@ -51,7 +52,7 @@ export default function PopularCategories() {
                             className="rounded-lg object-cover max-w-40 max-h-40"
                         />
                         <h3 className="font-normal text-md pt-4">{category.title}</h3>
-                    </div>
+                    </Link>
                 ))}
             </div>
 

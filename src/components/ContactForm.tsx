@@ -90,7 +90,10 @@ export default function ContactForm({
             <div className="bg-white rounded-lg p-6">
                 <h3 className="font-medium mb-4">İletişim Bilgileri</h3>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form 
+                    onSubmit={handleSubmit} 
+                    className="space-y-4 flex flex-col h-full"
+                >
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm mb-1">Adınız</label>
@@ -169,22 +172,23 @@ export default function ContactForm({
                             {"'"}ni okudum, onaylıyorum.
                         </label>
                     </div>
-                </form>
-            </div>
 
-            <div className="md:col-span-2 flex justify-between">
-                <button
-                    onClick={onBack}
-                    className="text-gray-600 hover:text-gray-800"
-                >
-                    ← Önceki Sayfa
-                </button>
-                <button
-                    type="submit"
-                    className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                >
-                    Devam Et
-                </button>
+                    <div className="md:col-span-2 flex justify-between mt-6">
+                        <button
+                            type="button"
+                            onClick={onBack}
+                            className="text-gray-600 hover:text-gray-800"
+                        >
+                            ← Önceki Sayfa
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                        >
+                            Devam Et
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     )

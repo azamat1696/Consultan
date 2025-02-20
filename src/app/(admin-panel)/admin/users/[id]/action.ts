@@ -10,6 +10,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { PacketType } from '@prisma/client';
 import { createLog } from "@/lib/logger";
 import crypto from "crypto";
+import { hashPassword } from "@/lib/password";
 
 interface Expertise {
     expertise_id: number;
@@ -65,6 +66,7 @@ export async function contactInfoRegister(formData: any, id: number) {
             await fs.mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
+            // @ts-ignore
             const fileName = `${session?.user?.id}-${Date.now()}${path.extname(formData.image.name)}`;
             const filePath = path.join(uploadsDir, fileName);
 
@@ -79,6 +81,12 @@ export async function contactInfoRegister(formData: any, id: number) {
         }
     }
 
+    // Hash password if it's being updated
+    let hashedPassword = formData.password;
+    if (formData.password) {
+        hashedPassword = await hashPassword(formData.password);
+    }
+
     const user = await prisma.user.update({
         where: {
             id: id,
@@ -88,7 +96,7 @@ export async function contactInfoRegister(formData: any, id: number) {
             surname: formData.surname,
             gender: formData.gender,
             email: formData.email,
-            password: formData.password,
+            password: hashedPassword,
             title: formData.title,
             phone: formData.phone,
             profile_image: imageUrl || formData.image || undefined

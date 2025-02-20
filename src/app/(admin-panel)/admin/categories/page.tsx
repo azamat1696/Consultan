@@ -1,14 +1,16 @@
 "use client"
-import React from "react";
+import React, { useState } from "react";
 import {
   Table, TableHeader, TableBody, TableColumn, TableRow, TableCell,
-  Button, Input, Modal, ModalContent, ModalHeader, ModalBody, useDisclosure, Select, SelectItem, Image as ImageComponent
+  Button, Input, Modal, ModalContent, ModalHeader, ModalBody, useDisclosure, Select, SelectItem, Image as ImageComponent, Chip
 } from "@heroui/react";
 import { PlusIcon, EditIcon, DeleteIcon, SearchIcon } from "@/components/icons";
-import { getCategories, addCategory, updateCategory, deleteCategory } from "./actions";
+import { getCategories, addCategory, updateCategory, deleteCategory, getExpertises, getWorkspaces } from "./actions";
 import { getMenus } from "../menus/actions";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { generateSlug } from "@/lib/slug";
+import Loading from "@/components/Loading";
 
 interface Category {
   id: bigint;
@@ -20,6 +22,28 @@ interface Category {
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  slug: string | null;
+  expertiseLinks?: Array<{
+    expertiseId: number;
+  }>;
+  categoryLinks?: Array<{
+    workspaceId: number;
+  }>;
+}
+
+interface Expertise {
+  expertise_id: number;
+  name: string;
+}
+
+interface Workspace {
+  workspace_id: number;
+  name: string;
+}
+
+interface SelectedItem {
+  id: number;
+  name: string;
 }
 
 export default function CategoriesPage() {
@@ -27,22 +51,31 @@ export default function CategoriesPage() {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [filterValue, setFilterValue] = React.useState("");
   const [filteredCategories, setFilteredCategories] = React.useState<Category[]>([]);
+  const [selectedExpertises, setSelectedExpertises] = React.useState<SelectedItem[]>([]);
+  const [selectedWorkspaces, setSelectedWorkspaces] = React.useState<SelectedItem[]>([]);
   const [formData, setFormData] = React.useState({
     title: "",
     page_path: "",
     menuId: 0,
     image: "",
+    slug: "",
   });
   const [editingId, setEditingId] = React.useState<number | null>(null);
   const [menus, setMenus] = React.useState<any[]>([]);
+  const [expertises, setExpertises] = React.useState<Expertise[]>([]);
+  const [workspaces, setWorkspaces] = React.useState<Workspace[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchCategories = async () => {
     try {
+      setIsLoading(true);
       const data = await getCategories();
-      setCategories(data);
-      setFilteredCategories(data);
+      setCategories(data as any);
+      setFilteredCategories(data as any);
     } catch (error) {
       toast.error("Kategoriler yüklenirken bir hata oluştu");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,9 +88,29 @@ export default function CategoriesPage() {
     }
   };
 
+  const fetchExpertises = async () => {
+    try {
+      const data = await getExpertises();
+      setExpertises(data);
+    } catch (error) {
+      toast.error("Uzmanlık alanları yüklenirken bir hata oluştu");
+    }
+  };
+
+  const fetchWorkspaces = async () => {
+    try {
+      const data = await getWorkspaces();
+      setWorkspaces(data);
+    } catch (error) {
+      toast.error("Çalışma alanları yüklenirken bir hata oluştu");
+    }
+  };
+
   React.useEffect(() => {
     fetchCategories();
     fetchMenus();
+    fetchExpertises();
+    fetchWorkspaces();
   }, []);
 
   const onSearchChange = React.useCallback((value: string) => {
@@ -73,18 +126,27 @@ export default function CategoriesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
+      const submitData = {
+        ...formData,
+        expertiseIds: selectedExpertises.map(item => Number(item.id)),
+        workspaceIds: selectedWorkspaces.map(item => Number(item.id))
+      };
+
       if (editingId) {
-        await updateCategory(editingId, formData);
+        await updateCategory(editingId, submitData);
         toast.success("Kategori güncellendi");
       } else {
-        await addCategory(formData);
+        await addCategory(submitData);
         toast.success("Kategori eklendi");
       }
       onClose();
       fetchCategories();
       resetForm();
-    } catch (error) {
-      toast.error("Bir hata oluştu");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,7 +156,10 @@ export default function CategoriesPage() {
       page_path: "",
       menuId: 0,
       image: "",
+      slug: "",
     });
+    setSelectedExpertises([]);
+    setSelectedWorkspaces([]);
     setEditingId(null);
   };
 
@@ -109,13 +174,68 @@ export default function CategoriesPage() {
       page_path: category.page_path || "",
       menuId: Number(category.menuId),
       image: category.image || "",
+      slug: category.slug || "",
     });
+    const existingExpertises = category.expertiseLinks?.map(link => ({
+      id: link.expertiseId,
+      name: expertises.find(e => +e.expertise_id === +link.expertiseId)?.name || ''
+    })) || [];
+    setSelectedExpertises(existingExpertises);
+    const existingWorkspaces = category.categoryLinks?.map(link => ({
+      id: link.workspaceId,
+      name: workspaces.find(w => +w.workspace_id === +link.workspaceId)?.name || ''
+    })) || [];
+    setSelectedWorkspaces(existingWorkspaces);
     setEditingId(Number(category.id));
     onOpen();
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setFormData({ 
+      ...formData, 
+      title: newTitle,
+      slug: generateSlug(newTitle)
+    });
+  };
+
+  const handleExpertiseChange = (keys: Set<string>) => {
+    // Filter out already selected expertises
+    const newKeys = Array.from(keys).filter(id => 
+      !selectedExpertises.some(item => item.id.toString() === id)
+    );
+    
+    const selected = newKeys.map(id => {
+      const expertise = expertises.find(e => e.expertise_id.toString() === id);
+      return {
+        id: Number(id),
+        name: expertise?.name || 'Unknown'
+      };
+    });
+
+    setSelectedExpertises(prev => [...prev, ...selected]);
+  };
+
+  const handleWorkspaceChange = (keys: Set<string>) => {
+    // Filter out already selected workspaces
+    const newKeys = Array.from(keys).filter(id => 
+      !selectedWorkspaces.some(item => item.id.toString() === id)
+    );
+
+    const selected = newKeys.map(id => {
+      const workspace = workspaces.find(w => w.workspace_id.toString() === id);
+      return {
+        id: Number(id),
+        name: workspace?.name || 'Unknown'
+      };
+    });
+
+    setSelectedWorkspaces(prev => [...prev, ...selected]);
+  };
+
   return (
     <div className="p-6">
+      {isLoading && <Loading />}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Kategoriler</h1>
         <div className="flex gap-4 items-center">
@@ -134,7 +254,7 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      <Table>
+      <Table aria-label="Kategoriler Listesi">
         <TableHeader>
           <TableColumn>Başlık</TableColumn>
           <TableColumn>Görsel</TableColumn>
@@ -170,7 +290,7 @@ export default function CategoriesPage() {
                   <Button isIconOnly variant="light" color="danger" 
                     onPress={() => {
                       if(confirm("Kategoriyi silmek istediğinize emin misiniz?")) {
-                        deleteCategory(category.id);
+                        deleteCategory(Number(category.id));
                         fetchCategories();
                       }
                     }}>
@@ -189,6 +309,7 @@ export default function CategoriesPage() {
         onOpenChange={(open) => {
           if (!open) handleClose();
         }}
+        size="5xl"
       >
         <ModalContent>
           <ModalHeader>
@@ -196,12 +317,95 @@ export default function CategoriesPage() {
           </ModalHeader>
           <ModalBody>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Başlık"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Başlık"
+                  value={formData.title}
+                  onChange={handleNameChange}
+                  required
+                />
+                <Input
+                  label="Sayfa Yolu"
+                  value={formData.page_path || ""}
+                  onChange={(e) => setFormData({ ...formData, page_path: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Uzmanlık Alanları"
+                  selectionMode="multiple"
+                  placeholder="Uzmanlık alanlarını seçin"
+                  selectedKeys={new Set(selectedExpertises.map(item => item.id.toString()))}
+                  onSelectionChange={(keys) => handleExpertiseChange(keys as Set<string>)}
+                >
+                  {expertises.map((expertise) => (
+                    <SelectItem key={expertise.expertise_id.toString()} value={expertise.expertise_id.toString()}>
+                      {expertise.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+
+                <Select
+                  label="Çalışma Alanları"
+                  selectionMode="multiple"
+                  placeholder="Çalışma alanlarını seçin"
+                  selectedKeys={new Set(selectedWorkspaces.map(item => item.id.toString()))}
+                  onSelectionChange={(keys) => handleWorkspaceChange(keys as Set<string>)}
+                >
+                  {workspaces.map((workspace) => (
+                    <SelectItem key={workspace.workspace_id.toString()} value={workspace.workspace_id.toString()}>
+                      {workspace.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Seçili Uzmanlık Alanları</p>
+                  <div 
+                    className="flex flex-wrap gap-2 min-h-[40px] p-2 border rounded-lg"
+                    aria-label="Seçili Uzmanlık Alanları Listesi"
+                  >
+                    {selectedExpertises.map((item) => (
+                      <Chip 
+                        key={item.id}
+                        onClose={() => {
+                          setSelectedExpertises(prev => prev.filter(i => i.id !== item.id));
+                        }}
+                        variant="flat"
+                        color="primary"
+                        className="text-sm"
+                      >
+                        {item.name}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Seçili Çalışma Alanları</p>
+                  <div 
+                    className="flex flex-wrap gap-2 min-h-[40px] p-2 border rounded-lg"
+                    aria-label="Seçili Çalışma Alanları Listesi"
+                  >
+                    {selectedWorkspaces.map((item) => (
+                      <Chip 
+                        key={item.id}
+                        onClose={() => {
+                          setSelectedWorkspaces(prev => prev.filter(i => i.id !== item.id));
+                        }}
+                        variant="flat"
+                        color="secondary"
+                        className="text-sm"
+                      >
+                        {item.name}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm mb-2">Görsel</label>
                 <Input
@@ -229,11 +433,6 @@ export default function CategoriesPage() {
                   </div>
                 )}
               </div>
-              <Input
-                label="Sayfa Yolu"
-                value={formData.page_path || ""}
-                onChange={(e) => setFormData({ ...formData, page_path: e.target.value })}
-              />
               <Select
                 label="Menü"
                 selectedKeys={[formData.menuId.toString()]}
@@ -241,12 +440,19 @@ export default function CategoriesPage() {
                 required
               >
                 <SelectItem key="0" value="0">Menü Seçin</SelectItem>
-                {menus.map((menu) => (
+                {menus?.map((menu: any) => (
                   <SelectItem key={menu.id} value={menu.id}>
                     {menu.title}
                   </SelectItem>
                 ))}
               </Select>
+              <Input
+                label="URL (Slug)"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
+                placeholder="URL'de görünecek benzersiz tanımlayıcı"
+                required
+              />
               <div className="flex justify-end gap-2">
                 <Button variant="flat" color="danger" onPress={handleClose}>
                   İptal

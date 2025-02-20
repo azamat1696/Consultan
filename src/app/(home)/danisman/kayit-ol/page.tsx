@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import HowItWorksSection from "@/components/HowItWorksSection";
 import {registerConsultant} from "@/app/(home)/danisman/kayit-ol/action";
 import { useRouter } from 'next/navigation'
+import toast from "react-hot-toast";
 export default function ConsultantRegistrationSection() {
     const [showPassword, setShowPassword] = useState(false)
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
@@ -26,6 +27,7 @@ export default function ConsultantRegistrationSection() {
         const data = await registerConsultant(formData)
         if (data) {
             console.log("Consultant registered successfully")
+            toast.success("Danışman kaydı başarıyla tamamlandı")
            return  router.push("/signin")
         }
     }

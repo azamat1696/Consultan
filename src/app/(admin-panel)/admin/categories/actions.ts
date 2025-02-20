@@ -5,17 +5,23 @@ import { softDelete } from "@/lib/softDelete";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
+import { generateSlug } from "@/lib/slug";
 
 export async function getCategories() {
   try {
-    return await prisma.category.findMany({
-      where: { deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+    const categories = await prisma.category.findMany({
       include: {
-        menu: true,
-        parentMenus: true
+        categoryLinks: true,
+        expertiseLinks: true
+      },
+      where: {
+        deletedAt: null
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
+    return categories;
   } catch (error) {
     console.error('Error fetching categories:', error);
     throw error;
@@ -43,8 +49,32 @@ async function saveImage(base64Image: string): Promise<string> {
   }
 }
 
-export async function addCategory(data: any) {
+interface CategoryData {
+  title: string;
+  menuId: number;
+  page_path?: string | null;
+  slug: string;
+  image?: string | null;
+  expertiseIds?: number[];
+  workspaceIds?: number[];
+}
+
+async function checkSlugExists(slug: string, currentId?: number): Promise<boolean> {
+  const existing = await prisma.category.findFirst({
+    where: {
+      slug,
+      id: { not: currentId },
+      deletedAt: null,
+    },
+  });
+  return !!existing;
+}
+
+export async function addCategory(data: CategoryData) {
   try {
+    if (await checkSlugExists(data.slug)) {
+      throw new Error("Bu URL (slug) zaten kullanımda. Lütfen başka bir başlık veya slug kullanın.");
+    }
     let imageUrl = '';
     if (data.image) {
       imageUrl = await saveImage(data.image);
@@ -56,6 +86,17 @@ export async function addCategory(data: any) {
         page_path: data.page_path,
         menuId: data.menuId,
         image: imageUrl,
+        slug: data.slug,
+        expertiseLinks: {
+          create: data.expertiseIds?.map(expertiseId => ({
+            expertise: { connect: { expertise_id: expertiseId } }
+          })) || []
+        },
+        categoryLinks: {
+          create: data.workspaceIds?.map(workspaceId => ({
+            workspace: { connect: { workspace_id: workspaceId } }
+          })) || []
+        }
       }
     });
     await createLog({
@@ -75,11 +116,37 @@ export async function addCategory(data: any) {
   }
 }
 
-export async function updateCategory(id: number, data: any) {
+export async function updateCategory(id: number, data: CategoryData) {
   try {
+    if (await checkSlugExists(data.slug, id)) {
+      throw new Error("Bu URL (slug) zaten kullanımda. Lütfen başka bir başlık veya slug kullanın.");
+    }
     let imageUrl = data.image;
     if (data.image && data.image.startsWith('data:image')) {
       imageUrl = await saveImage(data.image);
+    }
+
+    // Ensure all IDs are numbers
+    const expertiseIds = data.expertiseIds?.map(Number);
+    const workspaceIds = data.workspaceIds?.map(Number);
+
+    // First delete relations that are no longer needed
+    if (expertiseIds?.length) {
+      await prisma.categoryExpertiseLink.deleteMany({
+        where: {
+          categoryId: id,
+          expertiseId: { notIn: expertiseIds }
+        }
+      });
+    }
+
+    if (workspaceIds?.length) {
+      await prisma.categoryWorkspaceLink.deleteMany({
+        where: {
+          categoryId: id,
+          workspaceId: { notIn: workspaceIds }
+        }
+      });
     }
 
     const category = await prisma.category.update({
@@ -89,6 +156,33 @@ export async function updateCategory(id: number, data: any) {
         page_path: data.page_path,
         menuId: data.menuId,
         image: imageUrl,
+        slug: data.slug,
+        expertiseLinks: expertiseIds && expertiseIds.length > 0 ? {
+          connectOrCreate: expertiseIds.map(expertiseId => ({
+            where: {
+              categoryId_expertiseId: {
+                categoryId: id,
+                expertiseId
+              }
+            },
+            create: {
+              expertise: { connect: { expertise_id: expertiseId } }
+            }
+          })),
+        } : undefined,
+        categoryLinks: workspaceIds && workspaceIds.length > 0 ? {
+          connectOrCreate: workspaceIds.map(workspaceId => ({
+            where: {
+              categoryId_workspaceId: {
+                categoryId: id,
+                workspaceId
+              }
+            },
+            create: {
+              workspace: { connect: { workspace_id: workspaceId } }
+            }
+          })),
+        } : undefined
       }
     });
     await createLog({
@@ -111,3 +205,39 @@ export async function updateCategory(id: number, data: any) {
 export async function deleteCategory(id: number) {
     return softDelete('Category', id);
 } 
+
+export async function getExpertises() {
+  try {
+    const expertises = await prisma.expertise.findMany({
+      where: {
+        deletedAt: null
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    return expertises;
+  } catch (error) {
+    console.error('Error fetching expertises:', error);
+    throw error;
+  }
+}
+
+export async function getWorkspaces() {
+  try {
+    const workspaces = await prisma.workspace.findMany({
+      where: {
+        deletedAt: null,
+        status: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    return workspaces;
+  } catch (error) {
+    console.error('Error fetching workspaces:', error);
+    throw error;
+  }
+}
+

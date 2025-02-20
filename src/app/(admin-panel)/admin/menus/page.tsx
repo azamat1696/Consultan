@@ -29,6 +29,7 @@ interface Menu {
   title: string;
   type: string;
   page_path?: string;
+  order_number: number | null;
   parentId?: number | null | undefined;
   categoryId?: number | null | undefined;
   parent?: { title: string };
@@ -43,6 +44,7 @@ export default function MenusPage() {
     title: "",
     type: "",
     page_path: "",
+    order_number: 0,
     parentId: null,
     categoryId: null,
   });
@@ -78,6 +80,7 @@ export default function MenusPage() {
       title: "",
       type: "",
       page_path: "",
+      order_number: 0,
       parentId: null,
       categoryId: null,
     });
@@ -107,6 +110,7 @@ export default function MenusPage() {
       title: menu.title,
       type: menu.type,
       page_path: menu.page_path || "",
+      order_number: menu.order_number || 0,
       parentId: menu.parentId,
       categoryId: menu.categoryId,
     });
@@ -142,8 +146,9 @@ export default function MenusPage() {
       <Table>
         <TableHeader>
           <TableColumn>Başlık</TableColumn>
-          <TableColumn>Tip</TableColumn>
+          <TableColumn>Tür</TableColumn>
           <TableColumn>Sayfa Yolu</TableColumn>
+          <TableColumn>Sıra No</TableColumn>
           <TableColumn>Üst Menü</TableColumn>
           <TableColumn>İlişkili Kategori</TableColumn>
           <TableColumn>İşlemler</TableColumn>
@@ -154,6 +159,7 @@ export default function MenusPage() {
               <TableCell>{menu.title}</TableCell>
               <TableCell>{menu.type}</TableCell>
               <TableCell>{menu.page_path || "-"}</TableCell>
+              <TableCell>{menu.order_number || "-"}</TableCell>
               <TableCell>{menu.parent?.title || "-"}</TableCell>
               <TableCell>
                 {menu.type === "Relation" ? (
@@ -226,6 +232,12 @@ export default function MenusPage() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 required
+              />
+              <Input
+                type="number"
+                label="Sıra No"
+                value={formData.order_number}
+                onChange={(e) => setFormData({ ...formData, order_number: parseInt(e.target.value) || 0 })}
               />
               <Select
                 label="Tip"

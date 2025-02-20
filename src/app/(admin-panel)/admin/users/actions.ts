@@ -6,9 +6,10 @@ import path from 'path';
 import crypto from 'crypto';
 import { createLog } from "@/lib/logger";
 import { sendPasswordResetEmail } from "@/lib/mail";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { revalidateTag } from "next/cache";
+import { hashPassword } from "@/lib/password";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 interface GetUsersParams {
   search?: string;
@@ -23,6 +24,7 @@ interface CreateUserData {
   email: string | null;
   role: string | null;
   status: boolean;
+  slug: string | null;
   profile_image?: any;
   gender?: "male" | "female" | "other" | null;
   phone?: string | null;
@@ -84,6 +86,10 @@ export async function addUser(data: CreateUserData) {
       imageUrl = await saveImage(data.profile_image);
     }
 
+    // Generate and hash a random password
+    const randomPassword = crypto.randomUUID().slice(0, 8);
+    const hashedPassword = await hashPassword(randomPassword);
+
     const userData = {
       name: data.name,
       surname: data.surname,
@@ -93,12 +99,14 @@ export async function addUser(data: CreateUserData) {
       profile_image: imageUrl,
       gender: data.gender,
       phone: data.phone,
-      password: crypto.randomUUID().slice(0, 8), // More reliable than Math.random
+      password: hashedPassword,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const user = await prisma.user.create({ data: userData });
+
+    sendPasswordResetEmail(data.email, randomPassword, data.name);
 
     await createLog({
       type: "CREATE",
@@ -132,6 +140,7 @@ export async function updateUser(id: number, data: Partial<CreateUserData>) {
         surname: data.surname,
         email: data.email,
         role: data.role,
+        slug: data.slug,
         status: data.status,
         profile_image: imageUrl,
         gender: data.gender,
@@ -196,11 +205,12 @@ export async function resetPassword(id: number, newPassword: string) {
     }
 
     const newSessionVersion = (user.sessionVersion || 0) + 1;
+    const hashedPassword = await hashPassword(newPassword);
 
     await prisma.user.update({
       where: { id },
       data: { 
-        password: newPassword,
+        password: hashedPassword,
         sessionVersion: newSessionVersion
       },
     });
@@ -236,6 +246,11 @@ export async function resetPassword(id: number, newPassword: string) {
 }
 
 export async function getUser(id: number) {
+  // check if user is admin and session is admin
+  const session = await getServerSession(authOptions as any);
+  if (session?.user?.role !== 'admin') {
+    throw new Error('Unauthorized');
+  }
   try {
     if (!id || isNaN(id)) {
       throw new Error('Invalid user ID');
@@ -270,7 +285,7 @@ export async function getUser(id: number) {
         price: Number(packet.price),
         discounted_price: packet.discounted_price ? Number(packet.discounted_price) : null
       })),
-      meetingOptions: user.meetingOptions.map(option => ({
+      meetingOptions: user.meetingOptions.map((option: any) => ({
         ...option,
         price: Number(option.price)
       }))

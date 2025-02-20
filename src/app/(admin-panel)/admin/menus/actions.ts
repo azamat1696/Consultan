@@ -5,11 +5,17 @@ import { createLog } from "@/lib/logger";
 export async function getMenus() {
   try {
     const data = await prisma.menu.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { order_number: 'asc' },
+        { createdAt: 'desc' }
+      ],
       include: {
         parent: true,
         category: true,
         categories: true
+      },
+      where: {
+        deletedAt: null
       }
     });
 
@@ -39,6 +45,7 @@ export async function addMenu(data: any) {
         title: data.title,
         type: data.type,
         page_path: data.page_path,
+        order_number: data.order_number,
         parentId: data.parentId,
         categoryId: data.type === "Relation" ? data.categoryId : null,
         categories: data.type === "DropDown" ? {
@@ -73,6 +80,7 @@ export async function updateMenu(id: number, data: any) {
         title: data.title,
         type: data.type,
         page_path: data.page_path,
+        order_number: data.order_number,
         parentId: data.parentId,
         categoryId: data.categoryId,
       }

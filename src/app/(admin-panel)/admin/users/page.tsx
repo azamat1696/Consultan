@@ -23,6 +23,7 @@ import {
 import { User } from "@prisma/client";
 import toast from "react-hot-toast";
 import { getUsers, addUser, updateUser, deleteUser, resetPassword } from "./actions";
+import { generateSlug } from "@/lib/slug";
 import { PaginationMeta } from "@/types/index";
 import { SearchIcon, PlusIcon, EditIcon, DeleteIcon, KeyIcon, UserIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
@@ -56,6 +57,7 @@ export default function UsersTable() {
     profile_image: "",
     gender: null,
     phone: "",
+    slug: "",
   });
   const [editingUser, setEditingUser] = React.useState<User | null>(null);
 
@@ -105,7 +107,6 @@ export default function UsersTable() {
           status: formData.status ?? true,
           role: formData.role ?? 'user',
         };
-        console.log(userData);
         await addUser(userData as User);
         toast.success("Kullanıcı başarıyla eklendi");
       }
@@ -128,6 +129,7 @@ export default function UsersTable() {
       profile_image: "",
       gender: null,
       phone: "",
+      slug: "",
     });
     setEditingUser(null);
   };
@@ -143,6 +145,7 @@ export default function UsersTable() {
       profile_image: user.profile_image,
       gender: user.gender,
       phone: user.phone,
+      slug: user.slug,
     });
     onOpen();
   };
@@ -183,6 +186,29 @@ export default function UsersTable() {
       resetForm();
     }
     onOpenChange();
+  };
+
+  const generateUserSlug = (name: string, surname: string) => {
+    if (!name && !surname) return "";
+    return generateSlug(`${name} ${surname}`);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      name: newName,
+      slug: generateUserSlug(newName, formData.surname || "")
+    }));
+  };
+
+  const handleSurnameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSurname = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      surname: newSurname,
+      slug: generateUserSlug(formData.name || "", newSurname)
+    }));
   };
 
   return (
@@ -290,13 +316,13 @@ export default function UsersTable() {
                 <Input
                   label="Ad"
                   value={formData.name || ''}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={handleNameChange}
                   required
                 />
                 <Input
                   label="Soyad"
                   value={formData.surname || ''}
-                  onChange={(e) => setFormData({...formData, surname: e.target.value})}
+                  onChange={handleSurnameChange}
                   required
                 />
                 <Input
@@ -366,6 +392,13 @@ export default function UsersTable() {
                   <SelectItem key="active" value="active">Aktif</SelectItem>
                   <SelectItem key="passive" value="passive">Pasif</SelectItem>
                 </Select>
+                <Input
+                  label="Slug"
+                  value={formData.slug || ''}
+                  onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                  helperText="URL'de görünecek benzersiz tanımlayıcı"
+                  className="col-span-2"
+                />
               </div>
               <div className="flex justify-end gap-2 mt-4">
                 <Button color="danger" variant="flat" onPress={onClose}>

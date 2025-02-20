@@ -13,4 +13,7 @@ export const formatDate = (date: Date): string => {
     });
 };
 
+export const getSlug = (name: string): string => {
+    return name.toLowerCase().replace(/ /g, '-');
+};
  

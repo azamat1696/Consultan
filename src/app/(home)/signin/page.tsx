@@ -6,7 +6,7 @@ import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {signIn, useSession} from "next-auth/react";
-
+import toast from "react-hot-toast";
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState({
@@ -22,8 +22,14 @@ export default function LoginPage() {
             password: formData.password
         }).catch((error) => {
             console.error("Giriş hatası:", error)
+            toast.error("Giriş bilgilerinizi kontrol ediniz")
         }).then((response) => {
             console.log(response)
+            if (response?.error) {
+                toast.error("Giriş bilgilerinizi kontrol ediniz")
+            } else {
+                toast.success("Giriş başarılı")
+            }
         });
     }
 

@@ -7,6 +7,7 @@ import { Navigation, Pagination} from "swiper/modules";
 import { useEffect, useState } from 'react';
 import { getPopularConsultants, getPopularCategories } from '@/app/(home)/action';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface Consultant {
     id: number;
@@ -44,7 +45,7 @@ export default function PopularConsultants() {
             getPopularCategories()
         ]).then(([consultantsData, categoriesData]) => {
             setConsultants(consultantsData as any);
-            setCategories(categoriesData);
+            setCategories(categoriesData as any);
             setIsLoading(false);
         }).catch(console.error);
     }, []);
@@ -66,7 +67,7 @@ export default function PopularConsultants() {
         
         return numPrice.toFixed(2);
     };
-
+    console.log(consultants);
     return (
         !isLoading && (
         <div style={{backgroundImage: "url('/assets/images/Patterns.png')", backgroundColor: "#E9EFF9"}}
@@ -202,19 +203,21 @@ export default function PopularConsultants() {
                                 </div>
 
                                 {/* Buttons */}
-                                <div className="flex gap-2 w-full">
+                                <div className="flex justify-center gap-2 w-full">
                                     {
                                         consultant.packets.find((packet: any) => packet.packet_type === "FREE") && (
-                                            <button
-                                                className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium">
+                                            <Link 
+                                                href={`/danisman/${consultant?.slug}`}
+                                                className="text-center flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium">
                                                 Hemen Görüş
-                                            </button>
+                                            </Link>
                                         )
                                     }
-                                    <button
-                                        className="flex-1 bg-[#2D4D77] hover:bg-[#1e3557] text-white py-2 px-4 rounded-lg text-sm font-medium">
+                                    <Link
+                                         href={`/danisman/${consultant?.slug}`}
+                                        className="bg-[#2D4D77] hover:bg-[#1e3557] text-white py-2 px-4 rounded-lg text-sm font-medium text-center">
                                         Randevu Al
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </SwiperSlide>

@@ -15,6 +15,7 @@ export async function getPopularConsultants() {
                 title: true,
                 profile_image: true,
                 description: true,
+                slug: true,
                 expertKnowledges: {
                     select: {
                        expert_knowledge_id: true
@@ -120,12 +121,17 @@ export async function getMenus() {
             },
             include: {
                 children: {
-                    where: { deletedAt: null }
+                    where: { deletedAt: null },
+                    include: {
+                        category: true,
+                        parent: true
+                    }
                 },
-                category: true
+                category: true,
+                parent: true
             },
             orderBy: {
-                createdAt: 'asc'
+                order_number: 'asc'
             }
         });
         return menus;
