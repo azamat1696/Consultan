@@ -169,13 +169,13 @@ export default function Education() {
                         try {
                             let result: Education;
                             if (editingEducation) {
-                                result = await updateEducation(editingEducation.education_id, data);
+                                result = await updateEducation(editingEducation.education_id, data, idNumber);
                                 setEducations(prev => prev.map(edu => 
                                     edu.education_id === editingEducation.education_id ? result : edu
                                 ));
                                 toast.success("Eğitim bilgisi başarıyla güncellendi");
                             } else {
-                                result = await createEducation(data);
+                                result = await createEducation(data, idNumber);
                                 setEducations(prev => [...prev, result]);
                                 toast.success("Eğitim bilgisi başarıyla eklendi");
                             }

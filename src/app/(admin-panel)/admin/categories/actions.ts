@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { createLog } from "@/lib/logger";
 import { softDelete } from "@/lib/softDelete";
 import path from "path";
-import fs from "fs/promises";
+import { mkdir, writeFile } from 'fs/promises';
 import crypto from "crypto";
 import { generateSlug } from "@/lib/slug";
 
@@ -34,14 +34,14 @@ async function saveImage(base64Image: string): Promise<string> {
     const buffer = Buffer.from(base64Data, 'base64');
 
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'categories');
-    await fs.mkdir(uploadsDir, { recursive: true });
+    await mkdir(uploadsDir, { recursive: true });
 
     const uniqueId = crypto.randomUUID();
     const extension = base64Image.substring(base64Image.indexOf('/') + 1, base64Image.indexOf(';'));
     const filename = `category-${uniqueId}.${extension}`;
     const filepath = path.join(uploadsDir, filename);
 
-    await fs.writeFile(filepath, buffer);
+    await writeFile(filepath, buffer);
     return `/uploads/categories/${filename}`;
   } catch (error) {
     console.error('Error saving image:', error);

@@ -185,7 +185,6 @@ export default function ExpertisesPage() {
                 placeholder="mobil-uygulama-gelistirme"
                 value={expertiseSlug}
                 onChange={(e) => setExpertiseSlug(e.target.value)}
-                helperText="URL'de görünecek benzersiz tanımlayıcı"
               />
               <div className="flex items-center gap-2">
                 <Switch

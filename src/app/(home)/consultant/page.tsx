@@ -117,7 +117,10 @@ export default function Page() {
                 <CardBody>
                     <Accordion 
                         selectedKeys={[activeSection]}
-                        onSelectionChange={(key) => setActiveSection(key?.values().next().value)}
+                        onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0];
+                            setActiveSection(key.toString());
+                        }}
                     >
                         <AccordionItem key="1" title="İletişim Bilgileri">
                             <ContactInfo />

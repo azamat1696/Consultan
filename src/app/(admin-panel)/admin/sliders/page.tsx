@@ -281,7 +281,6 @@ export default function SlidersPage() {
                 </div>
               )}
               <Switch
-                label="Durum"
                 isSelected={formData.status}
                 onValueChange={(checked) => setFormData({ ...formData, status: checked })}
               >

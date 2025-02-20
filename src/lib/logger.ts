@@ -1,7 +1,8 @@
 "use server"
 import prisma from "@/lib/db";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 type LogData = {
   type: "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "ERROR";
@@ -14,7 +15,7 @@ export async function createLog(data: LogData) {
     const headersList = await headers();
     const ip = headersList.get("x-forwarded-for") || "unknown";
     const userAgent = headersList.get("user-agent") || "unknown";
-    const session = await auth();
+    const session = await getServerSession(authOptions)
 
     await prisma.log.create({
       data: {

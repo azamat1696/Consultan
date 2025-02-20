@@ -2,7 +2,7 @@
 import prisma from "@/lib/db";
 import {redirect} from "next/navigation";
 import { getServerSession } from "next-auth";
-import {authOptions} from "@/app/api/auth/[...nextauth]/route";
+import {authOptions} from "@/lib/auth";
 import fs from 'fs/promises';
 import path from 'path';
 import { User } from './types';
@@ -40,6 +40,13 @@ interface Language {
     name: string;
 }
 
+interface SessionUser {
+  user: {
+    id: number;
+    email?: string;
+  }
+}
+
 const DAYS = [
     { id: 1, name: 'Pazartesi' },
     { id: 2, name: 'Salı' },
@@ -51,7 +58,7 @@ const DAYS = [
 ];
 
 export async function contactInfoRegister(formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -66,7 +73,7 @@ export async function contactInfoRegister(formData: any) {
             await fs.mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
-            const fileName = `${session?.user?.id}-${Date.now()}${path.extname(formData.image.name)}`;
+            const fileName = `${session.user.id}-${Date.now()}${path.extname(formData.image.name)}`;
             const filePath = path.join(uploadsDir, fileName);
 
             // Convert File to Buffer and save
@@ -108,7 +115,7 @@ export async function contactInfoRegister(formData: any) {
 }
 
 export async function getContactInfo() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -121,7 +128,7 @@ export async function getContactInfo() {
 }
 
 export async function createEducation(formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -161,7 +168,7 @@ export async function createEducation(formData: any) {
 }
 
 export async function getEducations() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -185,7 +192,7 @@ export async function getEducations() {
 }
 
 export async function updateEducation(id: number, formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -212,7 +219,7 @@ export async function updateEducation(id: number, formData: any) {
 }
 
 export async function deleteEducation(id: number) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -236,7 +243,7 @@ export async function deleteEducation(id: number) {
 }
 
 export async function createCertificate(formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -273,7 +280,7 @@ export async function createCertificate(formData: any) {
 }
 
 export async function getCertificates() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -296,7 +303,7 @@ export async function getCertificates() {
 }
 
 export async function deleteCertificate(id: number) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -319,7 +326,7 @@ export async function deleteCertificate(id: number) {
 }
 
 export async function updateCertificate(id: number, formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -344,7 +351,7 @@ export async function updateCertificate(id: number, formData: any) {
 }
 
 export async function getExpertises() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -366,7 +373,7 @@ export async function getExpertises() {
 }
 
 export async function getConsultantExpertises() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -405,7 +412,7 @@ export async function getConsultantExpertises() {
 }
 
 export async function createConsultantExpertise(formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -458,7 +465,7 @@ export async function createConsultantExpertise(formData: any) {
 }
 
 export async function deleteConsultantExpertise(id: number) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -487,7 +494,7 @@ export async function deleteConsultantExpertise(id: number) {
 }
 
 export async function getWorkspaces() {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -509,7 +516,7 @@ export async function getWorkspaces() {
 }
 
 export async function updateConsultantExpertise(id: number, formData: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -552,7 +559,7 @@ export async function updateConsultantExpertise(id: number, formData: any) {
 }
 
 export async function saveWeeklyCalendar(data: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -603,7 +610,7 @@ export async function saveWeeklyCalendar(data: any) {
 }
 
 export async function getWeeklyCalendar() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -654,7 +661,7 @@ export async function getWeeklyCalendar() {
 }
 
 export async function saveMeetingOptions(data: { platforms: string[], languages: string[] }) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -700,7 +707,7 @@ export async function saveMeetingOptions(data: { platforms: string[], languages:
 }
 
 export async function getMeetingOptions() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -723,7 +730,7 @@ export async function getMeetingOptions() {
 }
 
 export async function savePackets(packets: any[]) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -780,7 +787,7 @@ export async function savePackets(packets: any[]) {
 }
 
 export async function getPackets() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -819,7 +826,7 @@ export async function getPackets() {
 }
 
 export async function updateDescription(description: string) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -837,7 +844,7 @@ export async function updateDescription(description: string) {
 }
 
 export async function saveBillingInfo(data: any) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }
@@ -885,7 +892,7 @@ export async function saveBillingInfo(data: any) {
 }
 
 export async function getBillingInfo() {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions) as SessionUser | null;
     if (!session) {
         redirect('/signin');
     }

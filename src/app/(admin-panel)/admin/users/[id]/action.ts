@@ -1,16 +1,15 @@
-"use server";
 import prisma from "@/lib/db";
 import {redirect} from "next/navigation";
 import { getServerSession } from "next-auth";
-import {authOptions} from "@/app/api/auth/[...nextauth]/route";
+import {authOptions} from "@/lib/auth";
 import fs from 'fs/promises';
 import path from 'path';
-import { User } from './types';
-import { Decimal } from '@prisma/client/runtime/library';
 import { PacketType } from '@prisma/client';
 import { createLog } from "@/lib/logger";
 import crypto from "crypto";
 import { hashPassword } from "@/lib/password";
+import { writeFile } from 'fs/promises'
+import { auth } from '@/lib/auth'
 
 interface Expertise {
     expertise_id: number;
@@ -886,8 +885,8 @@ export async function savePackets(packets: any[], id: number) {
                                    PacketType.PACKAGE,
                         packet_minutes: parseInt(packet.minutes) || 0,
                         meeting_times: parseInt(packet.meetingCount) || 0,
-                        price: new Decimal(packet.price || 0),
-                        discounted_price: new Decimal(packet.discountedPrice || 0),
+                        price: Number(packet.price || 0),
+                        discounted_price: Number(packet.discountedPrice || 0),
                         meeting_description: packet.description || '',
                         pre_questions: packet.preQuestions || '',
                         status: true,
@@ -1064,5 +1063,34 @@ export async function uploadImage(imageData: string) {
     } catch (error) {
         console.error('Error uploading image:', error);
         return { success: false, error: 'Image upload failed' };
+    }
+}
+
+export async function uploadFile(formData: FormData) {
+    try {
+        const session = await auth
+        if (!session || session.user.role !== 'admin') {
+            throw new Error('Unauthorized')
+        }
+
+        const file = formData.get('file') as File
+        if (!file) {
+            throw new Error('No file uploaded')
+        }
+
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+
+        // Save to public directory
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+        const filename = `${Date.now()}-${file.name}`
+        const filepath = path.join(uploadDir, filename)
+
+        await writeFile(filepath, buffer)
+        return { success: true, filepath: `/uploads/${filename}` }
+
+    } catch (error) {
+        console.error('Error uploading file:', error)
+        return { success: false, error: 'Failed to upload file' }
     }
 }

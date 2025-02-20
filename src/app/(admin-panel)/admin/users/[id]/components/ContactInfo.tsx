@@ -269,15 +269,23 @@ export default function ContactInfo() {
                                 {/* Role */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700"> Rol </label>
-                                                    <Select
-                                    label="Rol"
-                                    value={user?.role || ""}
-                                    selectedKeys={[user?.role || ""]}
-                                    onChange={(e) => setUser({...user, role: e.target.value})}
+                                    <Select
+                                        label="Rol"
+                                        value={user?.role || ""}
+                                        selectedKeys={[user?.role || ""]}
+                                        onChange={(e) => setUser(prev => ({
+                                            ...prev!,
+                                            name: prev?.name || '',
+                                            surname: prev?.surname || '',
+                                            gender: prev?.gender || '',
+                                            title: prev?.title || '',
+                                            phone: prev?.phone || '',
+                                            role: e.target.value
+                                        }))}
                                     >
-                                    <SelectItem key="user" value="user">Kullanıcı</SelectItem>
-                                    <SelectItem key="consultant" value="consultant">Danışman</SelectItem>
-                                    <SelectItem key="admin" value="admin">Admin</SelectItem>
+                                        <SelectItem key="user" value="user">Kullanıcı</SelectItem>
+                                        <SelectItem key="consultant" value="consultant">Danışman</SelectItem>
+                                        <SelectItem key="admin" value="admin">Admin</SelectItem>
                                     </Select>
                                 </div>
                                 <Button type="submit" className="w-full bg-red-500 text-white">

@@ -1,23 +1,73 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-export async function auth() {
-  const session = await getServerSession(authOptions as any);
-  return session;
+import { AuthOptions } from 'next-auth'
+import { User } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import prisma from '@/lib/db'
+import { comparePassword } from '@/lib/password'
+import { getServerSession } from 'next-auth'
+declare module 'next-auth' {
+    interface User {
+        id: number
+        email: string
+        role: 'admin' | 'client' | 'consultant'
+    }
+    interface Session {
+        user: User
+    }
 }
 
-export async function checkSessionVersion(token: any) {
-  const dbUser = await prisma.user.findUnique({
-    where: { id: token.id },
-    select: { sessionVersion: true }
-  });
+declare module 'next-auth/jwt' {
+    interface JWT {
+        role: 'admin' | 'client' | 'consultant'
+        id: number
+    }
+}
 
-  if (dbUser && dbUser.sessionVersion !== token.sessionVersion) {
-    return null; // This will force a new sign in
-  }
+export const authOptions: AuthOptions = {
+    providers: [
+        CredentialsProvider({
+            name: 'credentials',
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) {
+                    return null
+                }
 
-  return token;
-} 
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email },
+                    select: {
+                        id: true,
+                        email: true,
+                        password: true,
+                        role: true
+                    }
+                })
+
+                if (!user?.password || !user.role) {
+                    return null
+                }
+
+                const isValid = await comparePassword(credentials.password, user.password)
+                if (!isValid) {
+                    return null
+                }
+
+                return {
+                    id: parseInt(user.id.toString()),
+                    email: user.email || '',
+                    role: user.role as 'admin' | 'client' | 'consultant'
+                } as User
+            }
+        })
+    ],
+    session: {
+        strategy: "jwt"
+    },
+    pages: {
+        signIn: '/signin'
+    }
+}
+
+export const auth = getServerSession(authOptions)

@@ -36,6 +36,8 @@ const roleTranslations = {
 
 type RoleType = keyof typeof roleTranslations;
 
+type Gender = 'male' | 'female' | 'other' | null;
+
 export default function UsersTable() {
   const [filterValue, setFilterValue] = React.useState("");
   const [users, setUsers] = React.useState<User[]>([]);
@@ -341,7 +343,7 @@ export default function UsersTable() {
                 <Select
                   label="Cinsiyet"
                   selectedKeys={[formData.gender || ""]}
-                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value as Gender})}
                 >
                   <SelectItem key="male" value="male">Erkek</SelectItem>
                   <SelectItem key="female" value="female">Kadın</SelectItem>
@@ -396,7 +398,6 @@ export default function UsersTable() {
                   label="Slug"
                   value={formData.slug || ''}
                   onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                  helperText="URL'de görünecek benzersiz tanımlayıcı"
                   className="col-span-2"
                 />
               </div>

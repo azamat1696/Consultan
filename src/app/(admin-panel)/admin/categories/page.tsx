@@ -46,6 +46,11 @@ interface SelectedItem {
   name: string;
 }
 
+interface Menu {
+  id: number;
+  title: string;
+}
+
 export default function CategoriesPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [categories, setCategories] = React.useState<Category[]>([]);
@@ -61,7 +66,7 @@ export default function CategoriesPage() {
     slug: "",
   });
   const [editingId, setEditingId] = React.useState<number | null>(null);
-  const [menus, setMenus] = React.useState<any[]>([]);
+  const [menus, setMenus] = React.useState<Menu[]>([]);
   const [expertises, setExpertises] = React.useState<Expertise[]>([]);
   const [workspaces, setWorkspaces] = React.useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +96,7 @@ export default function CategoriesPage() {
   const fetchExpertises = async () => {
     try {
       const data = await getExpertises();
-      setExpertises(data);
+      setExpertises(data as any);
     } catch (error) {
       toast.error("Uzmanlık alanları yüklenirken bir hata oluştu");
     }
@@ -100,7 +105,7 @@ export default function CategoriesPage() {
   const fetchWorkspaces = async () => {
     try {
       const data = await getWorkspaces();
-      setWorkspaces(data);
+      setWorkspaces(data as any);
     } catch (error) {
       toast.error("Çalışma alanları yüklenirken bir hata oluştu");
     }
@@ -439,12 +444,14 @@ export default function CategoriesPage() {
                 onChange={(e) => setFormData({ ...formData, menuId: Number(e.target.value) })}
                 required
               >
-                <SelectItem key="0" value="0">Menü Seçin</SelectItem>
-                {menus?.map((menu: any) => (
-                  <SelectItem key={menu.id} value={menu.id}>
-                    {menu.title}
-                  </SelectItem>
-                ))}
+                {[
+                  <SelectItem key="0" value="0">Menü Seçin</SelectItem>,
+                  ...menus.map((menu) => (
+                    <SelectItem key={menu.id.toString()} value={menu.id.toString()}>
+                      {menu.title}
+                    </SelectItem>
+                  ))
+                ]}
               </Select>
               <Input
                 label="URL (Slug)"

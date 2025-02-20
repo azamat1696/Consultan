@@ -1,6 +1,5 @@
 "use server"
 import prisma from "@/lib/db";
-import { User } from "@prisma/client";
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
@@ -9,7 +8,7 @@ import { sendPasswordResetEmail } from "@/lib/mail";
 import { revalidateTag } from "next/cache";
 import { hashPassword } from "@/lib/password";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 interface GetUsersParams {
   search?: string;
@@ -28,6 +27,14 @@ interface CreateUserData {
   profile_image?: any;
   gender?: "male" | "female" | "other" | null;
   phone?: string | null;
+}
+
+// Add type for session
+interface SessionUser {
+  user: {
+    role: string;
+    id: number;
+  }
 }
 
 export async function getUsers(params: GetUsersParams = { search: "", role: null, skip: 0, take: 10 }) {
@@ -247,7 +254,7 @@ export async function resetPassword(id: number, newPassword: string) {
 
 export async function getUser(id: number) {
   // check if user is admin and session is admin
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions) as SessionUser | null;
   if (session?.user?.role !== 'admin') {
     throw new Error('Unauthorized');
   }

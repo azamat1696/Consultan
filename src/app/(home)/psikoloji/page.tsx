@@ -1,7 +1,9 @@
 import ConsultantSection from "@/components/ConsultantSection";
 
-export default function Page(){
+export default async function Page() {
     return (
-        <ConsultantSection />
+        <div>
+            {/* <ConsultantSection consultants={consultants || []} /> */}
+        </div>
     )
 }
