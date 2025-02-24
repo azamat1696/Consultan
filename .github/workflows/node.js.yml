@@ -25,6 +25,7 @@ jobs:
           STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}}
           ENABLE_PAYMENTS: ${{secrets.ENABLE_PAYMENTS}}
+          SECRET: ${{secrets.SECRET}}
 
     steps:
     - uses: actions/checkout@v4
