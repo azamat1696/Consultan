@@ -33,7 +33,6 @@ async function main() {
     console.log('Admin user already exists')
   }
 }
-
 main()
   .catch((e) => {
     console.error(e)
