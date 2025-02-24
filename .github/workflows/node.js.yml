@@ -36,5 +36,5 @@ jobs:
     - run: npm ci --legacy-peer-deps
     - run: npm run build --if-present
     - name: Directory 
-    - run: cd /home/azamat/actions-runner/_work/Consultan/Consultan
+      run: cd /home/azamat/actions-runner/_work/Consultan/Consultan
     - run: pm2 restart 0 
