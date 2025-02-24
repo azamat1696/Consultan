@@ -11,7 +11,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.19.1]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     env:
           DATABASE_URL: ${{secrets.DATABASE_URL}}
