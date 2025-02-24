@@ -20,7 +20,7 @@ export default async function Home() {
                       Daha Fazlası <span className="text-red-600 font-bold text-3xl">Advicemy`da!</span></h1>
                   {/* descriptiom */}
                   <p className="text-lg w-full flex justify-center items-center mt-3">Online Psikolog, Aile Danışmanı,
-                      Pedagog ve Diyetisyen</p>
+                      Pedagog ve Diyetisyen12</p>
               </div>
           </div>
           <PopularCategories/>
