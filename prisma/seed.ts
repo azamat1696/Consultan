@@ -1,4 +1,4 @@
-import { PrismaClient, Gender, PacketType, AppointmentStatus, MenuType, LogType } from '@prisma/client'
+import { PrismaClient, Gender } from '@prisma/client'
 import { hashPassword } from '../src/lib/password'
 
 const prisma = new PrismaClient()
