@@ -24,7 +24,7 @@ jobs:
     - name: Generate Prisma Client
       run: npx prisma generate
     - name: Apply Database Migrations
-      run: npx prisma db push
+      run: npx prisma db push --accept-data-loss
     - name: Directory 
       run: cd /home/azamat/actions-runner/_work/Consultan/Consultan
     - run: pm2 restart 0 
