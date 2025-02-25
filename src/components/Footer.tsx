@@ -8,7 +8,7 @@ export default function Footer(){
                     <div className="flex flex-wrap justify-between items-start mb-8">
                         <div className="w-full text-center md:w-1/4 mb-6 md:mb-0">
                             <a href="#" className="text-white font-bold text-lg bg-white rounded-full p-2">
-                                <Image src="/assets/icons/logo.png" alt="Dancomy Logo" width={150} height={150} />
+                               {/* <Image src="/assets/icons/logo.png" alt="Dancomy Logo" width={150} height={150} /> */}
                                 © 2023
                             </a>
                         </div>
