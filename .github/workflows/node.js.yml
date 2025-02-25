@@ -35,14 +35,10 @@ jobs:
         cache: 'npm'
     - run: npm ci --legacy-peer-deps
     - run: npm run build --if-present
-    - run: |
-        npx prisma migrate diff \
-          --from-empty \
-          --to-schema-datamodel prisma/schema.prisma \
-          --script > baseline.sql
+    - name: Generate Prisma Client
+      run: npx prisma generate
+    - name: Apply Database Migrations
+      run: npx prisma migrate deploy
     - name: Directory 
       run: cd /home/azamat/actions-runner/_work/Consultan/Consultan
-    - run: pm2 restart 0
-    - run: npx prisma migrate reset --force
-    - run: npx prisma migrate dev --name baseline
-    - run: npx prisma migrate deploy 
+    - run: pm2 restart 0 
