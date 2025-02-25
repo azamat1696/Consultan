@@ -286,6 +286,7 @@ export default function MenusPage() {
               {formData.type === "Relation" && (
                 <Select
                   label="Kategori"
+                  selectionMode="single"
                   selectedKeys={formData.categoryId ? [formData.categoryId.toString()] : []}
                   onChange={(e) =>
                     setFormData({

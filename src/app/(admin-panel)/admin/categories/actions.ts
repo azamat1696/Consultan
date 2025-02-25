@@ -12,7 +12,8 @@ export async function getCategories() {
     const categories = await prisma.category.findMany({
       include: {
         categoryLinks: true,
-        expertiseLinks: true
+        expertiseLinks: true,
+        menu: true
       },
       where: {
         deletedAt: null

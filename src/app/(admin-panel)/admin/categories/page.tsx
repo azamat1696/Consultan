@@ -14,11 +14,13 @@ import Loading from "@/components/Loading";
 
 interface Category {
   id: bigint;
-  menuId: bigint;
   title: string;
   page_path: string | null;
   image: string | null;
-  menu?: { title: string };
+  menu: {
+    id: number;
+    title: string;
+  };
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -123,7 +125,7 @@ export default function CategoriesPage() {
     const filtered = categories.filter((category) =>
       category.title.toLowerCase().includes(value.toLowerCase()) ||
       category.page_path?.toLowerCase().includes(value.toLowerCase()) ||
-      category.menu?.title.toLowerCase().includes(value.toLowerCase())
+      category.menu.title.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredCategories(filtered);
   }, [categories]);
@@ -177,7 +179,7 @@ export default function CategoriesPage() {
     setFormData({
       title: category.title,
       page_path: category.page_path || "",
-      menuId: Number(category.menuId),
+      menuId: Number(category.menu.id),
       image: category.image || "",
       slug: category.slug || "",
     });
@@ -286,7 +288,11 @@ export default function CategoriesPage() {
                 )}
               </TableCell>
               <TableCell>{category.page_path || "-"}</TableCell>
-              <TableCell>{category.menu?.title || "-"}</TableCell>
+              <TableCell>
+                <div className="flex flex-wrap gap-1">
+                  {category.menu.title}
+                </div>
+              </TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   <Button isIconOnly variant="light" onPress={() => handleEdit(category)}>
@@ -440,6 +446,7 @@ export default function CategoriesPage() {
               </div>
               <Select
                 label="Menü"
+                selectionMode="single"
                 selectedKeys={[formData.menuId.toString()]}
                 onChange={(e) => setFormData({ ...formData, menuId: Number(e.target.value) })}
                 required
