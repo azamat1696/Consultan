@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image"
 export default function Footer(){
     return (
         <div className="bg-gray-100">
@@ -7,8 +8,7 @@ export default function Footer(){
                     <div className="flex flex-wrap justify-between items-start mb-8">
                         <div className="w-full text-center md:w-1/4 mb-6 md:mb-0">
                             <a href="#" className="text-white font-bold text-lg">
-                                <img src="logo.png" alt="Advicemy Logo"
-                                     className="h-12 mb-2"/>
+                                <Image src="/assets/icons/logo.png" alt="Dancomy Logo" width={150} height={150} />
                                 © 2023
                             </a>
                         </div>
@@ -62,7 +62,7 @@ export default function Footer(){
                     <div className="border-t border-white opacity-30 my-6"></div>
                     <div className="text-sm text-white space-y-4 text-center">
                         <p>
-                            <strong>Dikkat</strong> – Online danışmanlık hizmeti, herkese uygun bir hizmet değildir.
+                            <strong>Dikkat</strong> – Online terapi hizmeti, herkese uygun bir hizmet değildir.
                             İntihar veya kendine zarar vermek gibi düşüncelere sahipseniz, sitedeki hizmetler size uygun
                             olmayabilir. Bu durumdaysanız aşağıdaki yardım numaraları ile iletişime geçmenizi tavsiye
                             ederiz:
