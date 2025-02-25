@@ -43,7 +43,7 @@ export default function DropDownMenu() {
     const handleMenuClick = (menuId: number) => {
         setOpenMenuId(openMenuId === menuId ? null : menuId);
     };
-    console.log(menus);
+    console.log('menus',menus);
 
     const renderMenuItem = (menu: Menu) => {
         // BlankPage type - direct link
@@ -80,13 +80,17 @@ export default function DropDownMenu() {
                                         >
                                             {child.title}
                                         </Link>
-                                    ) : child.category && (
-                                        <Link
-                                            href={`/kategoriler/${child.category.slug}`}
-                                            className="block py-2 text-gray-600 hover:text-[#857B9E] transition-colors"
-                                        >
-                                            {child.category.title}
-                                        </Link>
+                                    ) : child.categories && (
+                                        
+                                            child.categories.map((category: Category) => (
+                                                <Link
+                                                    href={`/kategoriler/${category.slug}`}
+                                                    className="block py-2 text-gray-600 hover:text-[#857B9E] transition-colors"
+                                                >
+                                                    {category.title}
+                                                </Link>
+                                            ))
+                                        
                                     )}
                                 </div>
                             ))}

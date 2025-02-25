@@ -162,9 +162,7 @@ export default function MenusPage() {
               <TableCell>{menu.order_number || "-"}</TableCell>
               <TableCell>{menu.parent?.title || "-"}</TableCell>
               <TableCell>
-                {menu.type === "Relation" ? (
-                  menu.category?.title || "-"
-                ) : menu.type === "DropDown" ? (
+                
                   <div>
                     <Button
                       variant="light"
@@ -184,9 +182,7 @@ export default function MenusPage() {
                       </div>
                     )}
                   </div>
-                ) : (
-                  "-"
-                )}
+                
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
