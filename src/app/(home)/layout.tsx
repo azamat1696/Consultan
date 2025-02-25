@@ -38,10 +38,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
       <Provider>
-           <Navbar/>
-            {children}
-            <Footer/>   
-            <Toaster position="top-right" />
+         <div className="flex flex-col min-h-screen">
+                <Navbar/>
+                  {children}
+                <Footer/>   
+                <Toaster position="top-right" />
+         </div>
        </Provider>
       </body>
     </html>

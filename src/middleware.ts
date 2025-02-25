@@ -12,6 +12,7 @@ const roleBasedRoutes = {
 
 export default async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    
     const { pathname } = req.nextUrl;
     const pathnameArray = pathname.split('/');
     const pathnameArrayWithoutSlash = pathnameArray.filter(p => p !== '');
@@ -24,7 +25,6 @@ export default async function middleware(req: NextRequest) {
     //if (isPublicRoute(pathname)) {
     //    return NextResponse.next();
     //}
-
     // Redirect unauthenticated users to the sign-in page
     if (!token) {
         if (pathname !== '/signin') {
@@ -34,11 +34,10 @@ export default async function middleware(req: NextRequest) {
     }
     // Role-based access control
     // @ts-ignore
-    const userRole = token?.user?.role as 'admin' | 'consultant' | 'client';
+    const userRole = token?.role as 'admin' | 'consultant' | 'client';
     // Check if the user's role grants access to the route
     const allowedRoutes = roleBasedRoutes[userRole] || [];
     const isAuthorized = allowedRoutes.some((route) => pathname.startsWith(route));
-
     if (!isAuthorized) {
         // Redirect unauthorized users to an error page
         return NextResponse.redirect(new URL('/unauthorized', req.url));
