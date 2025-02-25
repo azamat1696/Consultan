@@ -49,7 +49,7 @@ export default function DropDownMenu() {
         // BlankPage type - direct link
         if (menu.type === "BlankMenu" && menu.page_path) {
             return (
-                <Link href={menu.page_path} className="text-gray-700 hover:text-red-500 font-medium transition-colors duration-300 ease-in-out hover:scale-105">
+                <Link href={menu.page_path} className="text-gray-700 hover:text-[#857B9E] font-medium transition-colors duration-300 ease-in-out hover:scale-105">
                     {menu.title}
                 </Link>
             );
@@ -61,7 +61,7 @@ export default function DropDownMenu() {
             return (
                 <div className="relative group menu-dropdown transition-colors duration-300 ease-in-out hover:scale-105">
                     <button
-                        className={`text-gray-700 hover:text-red-500 font-medium py-2 ${openMenuId === menu.id ? 'text-red-500' : ''}`}
+                        className={`text-gray-700 hover:text-[#857B9E] font-medium py-2 ${openMenuId === menu.id ? 'text-[#857B9E]' : ''}`}
                         onClick={() => handleMenuClick(menu.id)}
                     >
                         {menu.title}
@@ -76,14 +76,14 @@ export default function DropDownMenu() {
                                     {child.type === "BlankPage" && child.page_path ? (
                                         <Link 
                                             href={child.page_path}
-                                            className="text-gray-600 hover:text-red-500"
+                                            className="text-gray-600 hover:text-[#857B9E]"
                                         >
                                             {child.title}
                                         </Link>
                                     ) : child.category && (
                                         <Link
                                             href={`/kategoriler/${child.category.slug}`}
-                                            className="block py-2 text-gray-600 hover:text-red-500 transition-colors"
+                                            className="block py-2 text-gray-600 hover:text-[#857B9E] transition-colors"
                                         >
                                             {child.category.title}
                                         </Link>

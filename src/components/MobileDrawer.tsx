@@ -32,7 +32,7 @@ export default function MobileDrawer() {
                 <DrawerContent className="z-[999] rounded-none shadow-none w-full">
                     {() => (
                         <>
-                            <DrawerHeader className="flex flex-col gap-1 items-center text-red-500 underline-offset-4 underline">Ana Sayfa</DrawerHeader>
+                            <DrawerHeader className="flex flex-col gap-1 items-center text-[#35303E] underline-offset-4 underline">Ana Sayfa</DrawerHeader>
                             <DrawerBody>
 
                                 <Accordion variant="light">
@@ -40,7 +40,7 @@ export default function MobileDrawer() {
                                         key="1"
                                         aria-label="Ruh Sağlığım İçin"
                                         title="Ruh Sağlığım İçin"
-                                        startContent={<FontAwesomeIcon icon={faHeart} color={'red'} height={25}/>}
+                                        startContent={<FontAwesomeIcon icon={faHeart} color={'#35303E'} height={25}/>}
                                     >
                                         <ul className="space-y-2 ml-3">
                                             <li>Psikoloji</li>
@@ -54,7 +54,7 @@ export default function MobileDrawer() {
                                         key="2"
                                         aria-label="Accordion 2"
                                         title="Bedenim İçin"
-                                        startContent={<FontAwesomeIcon icon={faPersonPregnant} color={'red'} height={25}/>}
+                                        startContent={<FontAwesomeIcon icon={faPersonPregnant} color={'#35303E'} height={25}/>}
                                     >
                                         <ul className="space-y-2 ml-3">
                                             <li>Diyetisyen</li>
@@ -67,7 +67,7 @@ export default function MobileDrawer() {
                                         key="3"
                                         aria-label="Accordion 3"
                                         title="İşim İçin"
-                                        startContent={<FontAwesomeIcon icon={faSuitcase} color={'red'} height={25}/>}
+                                        startContent={<FontAwesomeIcon icon={faSuitcase} color={'#35303E'} height={25}/>}
                                     >
                                         <ul className="space-y-2 ml-3">
                                             <li>Kariyer Koçu</li>
@@ -78,7 +78,7 @@ export default function MobileDrawer() {
                                     </AccordionItem>
                                 </Accordion>
                                 <div className="cursor-pointer flex justify-start items-center ml-2">
-                                    <FontAwesomeIcon icon={faPersonCirclePlus} color={'red'} height={25} className="mr-2"/>
+                                    <FontAwesomeIcon icon={faPersonCirclePlus} color={'#35303E'} height={25} className="mr-2"/>
                                     <div>Danışman Ol</div>
                                 </div>
 

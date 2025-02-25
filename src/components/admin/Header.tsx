@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { User, Bell, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-
+import Image from 'next/image';
 const MENU_ITEMS = [
     { href: '/admin', label: 'Dashboard' },
     { href: '/admin/users', label: 'Kullanıcılar' },
@@ -28,11 +28,11 @@ export default function AdminHeader() {
     return (
         <header className="bg-white border-b">
             <div className="mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex h-16 items-center justify-between">
+                <div className="flex h-20 items-center justify-between">
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/admin" className="text-xl font-bold text-gray-800">
-                            Advicemy Admin
+                            <Image src="/assets/icons/logo.png" alt="logo" width={150} height={150} className="" />
                         </Link>
                     </div>
                     <div className="flex items-center gap-4">

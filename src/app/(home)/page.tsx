@@ -13,19 +13,19 @@ export default async function Home() {
   return (
       <>
           <Slider/>
-          <div style={{backgroundImage: "url('/assets/images/Patterns.png')", backgroundColor: "#E9EFF9"}}
+          <div style={{backgroundColor: "#857b9e"}}
                className="px-5 py-8 flex justify-center items-center">
               <div className="items-center">
-                  <h1 className="text-2xl font-bold w-full">Online Psikolog, Aile Danışmanı, Çocuk Gelişim, Astrolog ve
-                      Daha Fazlası <span className="text-red-600 font-bold text-3xl">Advicemy`da!</span></h1>
+                  <h1 className="text-2xl font-bold w-full text-white">Online Psikolog, Aile Danışmanı, Çocuk Gelişim, Astrolog ve
+                      Daha Fazlası <span className="text-white font-bold text-3xl">Dancomy`da!</span></h1>
                   {/* descriptiom */}
-                  <p className="text-lg w-full flex justify-center items-center mt-3">Online Psikolog, Aile Danışmanı,
-                      Pedagog ve Diyetisyen12</p>
+                  <p className="text-lg w-full flex justify-center items-center mt-3 text-white">Online Psikolog, Aile Danışmanı,
+                      Pedagog ve Diyetisyen</p>
               </div>
           </div>
           <PopularCategories/>
           <PopularConsultants />
-          <div className="mx-5 py-16 px-10">
+          {/*<div className="mx-5 py-16 px-10">
               <div className="grid md:grid-cols-2 gap-12 items-center">
                   <div className="relative">
                       <div className="absolute bg-blue-100 rounded-full w-64 h-64 -z-10 -left-10 -top-10"></div>
@@ -57,17 +57,17 @@ export default async function Home() {
                            className="rounded-lg"/>
                   </div>
               </div>
-          </div>
+          </div> */}
           <div className="bg-gray-50">
               <div className="py-16">
                   <div className="container mx-auto text-center">
                       <h2 className="text-2xl font-semibold text-gray-800 mb-8">
-                          Size Sunduğumuz <span className="text-red-500">Avantajlar...</span>
+                          Size Sunduğumuz <span className="text-gray-800">Avantajlar...</span>
                       </h2>
                       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
                           <div className="bg-white shadow-lg rounded-lg p-6 text-center">
                               <div className="flex justify-center items-center mb-4">
-                                  <div className="bg-red-500 rounded-full p-3 text-center">
+                                  <div className="bg-[#35303E] rounded-full p-3 text-center">
                                       <FontAwesomeIcon icon={faVideoCamera} color="white" height={45} width={30}
                                                        size="2xl"/>
                                   </div>
@@ -80,7 +80,7 @@ export default async function Home() {
 
                           <div className="bg-white shadow-lg rounded-lg p-6 text-center">
                               <div className="flex justify-center items-center mb-4">
-                                  <div className="bg-red-500 rounded-full p-3 text-center">
+                                  <div className="bg-[#35303E] rounded-full p-3 text-center">
                                       <FontAwesomeIcon icon={faComment} color="white" height={45} width={30}
                                                        size="2xl"/>
                                   </div>
@@ -94,7 +94,7 @@ export default async function Home() {
 
                           <div className="bg-white shadow-lg rounded-lg p-6 text-center">
                               <div className="flex justify-center items-center mb-4">
-                                  <div className="bg-red-500 rounded-full p-3 text-center">
+                                  <div className="bg-[#35303E] rounded-full p-3 text-center">
                                       <FontAwesomeIcon icon={faCreditCard} color="white" height={45} width={30}
                                                        size="2xl"/>
                                   </div>
@@ -107,7 +107,7 @@ export default async function Home() {
 
                           <div className="bg-white shadow-lg rounded-lg p-6 text-center">
                               <div className="flex justify-center items-center mb-4">
-                                  <div className="bg-red-500 rounded-full p-3 text-center">
+                                  <div className="bg-[#35303E] rounded-full p-3 text-center">
                                       <FontAwesomeIcon icon={faCheckCircle} color="white" height={45} width={30}
                                                        size="2xl"/>
                                   </div>

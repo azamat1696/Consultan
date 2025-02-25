@@ -70,10 +70,10 @@ export default function PopularConsultants() {
     console.log(consultants);
     return (
         !isLoading && (
-        <div style={{backgroundImage: "url('/assets/images/Patterns.png')", backgroundColor: "#E9EFF9"}}
+        <div style={{backgroundColor: "#857b9e"}}
              className="py-10 w-full">
             <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold">Popüler Danışmanlar</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">Popüler Danışmanlar</h2>
             </div>
 
             <div className="lg:container xl:container 2xl:container w-full mx-auto lg:px-[1rem] xl:px-[10rem] 2xl:px-[10rem] px-4 ">

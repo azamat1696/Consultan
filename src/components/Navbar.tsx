@@ -21,7 +21,7 @@ export default function Navbar(){
                             <MobileDrawer/>
                             <Link href="/">
                                 <Image
-                                    src="/assets/icons/advicemy2.svg"
+                                    src="/assets/icons/logo.png"
                                     alt="logo"
                                     width={230}
                                     height={25}
@@ -31,7 +31,7 @@ export default function Navbar(){
                         </div>
                         <Link href="/">
                             <Image
-                                src="/assets/icons/advicemy2.svg"
+                                src="/assets/icons/logo.png"
                                 alt="logo"
                                 width={230}
                                 height={50}
@@ -51,11 +51,11 @@ export default function Navbar(){
 
                         </div>
                         <div className="cursor-pointer flex justify-between items-center">
-                            <FontAwesomeIcon icon={faEnvelope} color={'red'} height={25} className="mr-4"/>
+                            <FontAwesomeIcon icon={faEnvelope} color={'#35303E'} height={25} className="mr-4"/>
                         </div>
                         <div className="cursor-pointer sm:flex justify-between items-center hidden">
                             <Link  href="/danisman/kayit-ol"
-                                  className="text-xs font-semibold transition ease-out uppercase border-1.5 py-1.5 px-3 rounded-full border-red-600 text-red-600  transform scale-80 cursor-pointer">
+                                  className="text-xs font-semibold transition ease-out uppercase border-1.5 py-1.5 px-3 rounded-full border-[#35303E] text-[#35303E]  transform scale-80 cursor-pointer">
                                 Danışman Ol
                             </Link>
                         </div>

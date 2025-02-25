@@ -64,12 +64,12 @@ export default function Slider() {
                                     placeholder="blur"
                                     blurDataURL={slider.image || "/assets/images/default-slider.jpg"}
                                 />
-                                {(slider.title || slider.description) && (
+                                {/* (slider.title || slider.description) && (
                                     <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center text-white text-center p-4 z-10">
                                         {slider.title && <h2 className="text-4xl font-bold mb-4">{slider.title}</h2>}
                                         {slider.description && <p className="text-xl">{slider.description}</p>}
                                     </div>
-                                )}
+                                ) */}
                             </div>
                         </SwiperSlide>
                     ))}

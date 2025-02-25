@@ -59,7 +59,7 @@ export default function SearchBar() {
                 />
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3 text-red-600"
+                    className="h-3 w-3 text-[#35303E]"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                 >
@@ -96,14 +96,14 @@ export default function SearchBar() {
                                         <p className="text-sm text-gray-400 line-through">
                                             {result.oldPrice}
                                         </p>
-                                        <p className="text-sm text-red-500 font-bold">
+                                        <p className="text-sm text-[#35303E] font-bold">
                                             {result.newPrice}
                                         </p>
                                     </div>
                                 </div>
                             ))}
                             <div className="text-center p-3">
-                                <button className="text-blue-500 hover:underline">
+                                <button className="text-[#35303E] hover:underline">
                                     Tüm Sonuçları Gör (982)
                                 </button>
                             </div>

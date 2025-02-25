@@ -52,11 +52,11 @@ export default function MobileNavbar(){
                             <div className="mr-5 text-md text-gray-700 hidden lg:flex xl:flex">Hesabım</div>
                         </div>
                         <div className="cursor-pointer flex justify-between items-center">
-                            <FontAwesomeIcon icon={faEnvelope} color={'red'} height={21} className="mr-4"/>
+                            <FontAwesomeIcon icon={faEnvelope} color={'#35303E'} height={21} className="mr-4"/>
                         </div>
                         <div className="cursor-pointer sm:flex justify-between items-center hidden">
                             <Link href="https://selfservice.kktctelsim.com/" target="_blank"
-                                  className="text-xs font-semibold transition ease-out uppercase border-1.5 py-1.5 px-3 rounded-full border-red-600 text-red-600  transform scale-80">
+                                  className="text-xs font-semibold transition ease-out uppercase border-1.5 py-1.5 px-3 rounded-full border-[#35303E] text-white transform scale-80">
                                 Danışman Ol
                             </Link>
                         </div>
