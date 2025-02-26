@@ -1,19 +1,24 @@
 "use server"
 import nodemailer from "nodemailer";
+import prisma from "./db";
+import { createHash } from "crypto";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
+// transporter'ı fonksiyon içinde oluşturalım
+async function createTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: true,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
 
 export async function sendPasswordResetEmail(email: string, password: string, name: string) {
   try {
+    const transporter = await createTransporter();
     await transporter.sendMail({
       from: `"Advicemy" <${process.env.SMTP_USER}>`,
       to: email,
@@ -39,6 +44,7 @@ export async function sendPasswordResetEmail(email: string, password: string, na
 
 export async function sendNewConsultantNotification(adminEmail: string, consultant: { email: string, id: number }) {
   try {
+    const transporter = await createTransporter();
     await transporter.sendMail({
       from: `"Advicemy" <${process.env.SMTP_USER}>`,
       to: adminEmail,
@@ -58,46 +64,109 @@ export async function sendNewConsultantNotification(adminEmail: string, consulta
     console.error("Error sending email:", error);
     return false;
   }
-} 
+}
 
 export async function sendAppointmentEmails(appointment: any, consultant: any, client: any) {
-  const appointmentDate = new Date(appointment.date_time)
-  const formattedDate = appointmentDate.toLocaleDateString('tr-TR')
+  try {
+    const transporter = await createTransporter();
+    const appointmentDate = new Date(appointment.date_time);
+    const formattedDate = appointmentDate.toLocaleDateString('tr-TR');
 
-  // Client email
-  await transporter.sendMail({
+    // Client email
+    await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: client.email,
       subject: 'Randevunuz Onaylandı',
       html: `
-          <h2>Merhaba ${client.name},</h2>
-          <p>Randevunuz başarıyla oluşturuldu.</p>
-          <h3>Randevu Detayları:</h3>
-          <ul>
-              <li>Danışman: ${consultant.name} ${consultant.surname}</li>
-              <li>Tarih: ${formattedDate}</li>
-              <li>Saat: ${appointment.appointment_time}</li>
-          </ul>
-          <p>Görüşme öncesi hatırlatma alacaksınız.</p>
+        <h2>Merhaba ${client.name},</h2>
+        <p>Randevunuz başarıyla oluşturuldu.</p>
+        <h3>Randevu Detayları:</h3>
+        <ul>
+          <li>Danışman: ${consultant.name} ${consultant.surname}</li>
+          <li>Tarih: ${formattedDate}</li>
+          <li>Saat: ${appointment.appointment_time}</li>
+        </ul>
+        <p>Görüşme öncesi hatırlatma alacaksınız.</p>
       `
-  })
+    });
 
-  // Consultant email
-  await transporter.sendMail({
+    // Consultant email
+    await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: consultant.email,
       subject: 'Yeni Randevu',
       html: `
-          <h2>Merhaba ${consultant.name},</h2>
-          <p>Yeni bir randevunuz var.</p>
-          <h3>Randevu Detayları:</h3>
-          <ul>
-              <li>Danışan: ${client.name} ${client.surname}</li>
-              <li>Email: ${client.email}</li>
-              <li>Telefon: ${client.phone}</li>
-              <li>Tarih: ${formattedDate}</li>
-              <li>Saat: ${appointment.appointment_time}</li>
-          </ul>
+        <h2>Merhaba ${consultant.name},</h2>
+        <p>Yeni bir randevunuz var.</p>
+        <h3>Randevu Detayları:</h3>
+        <ul>
+          <li>Danışan: ${client.name} ${client.surname}</li>
+          <li>Email: ${client.email}</li>
+          <li>Telefon: ${client.phone}</li>
+          <li>Tarih: ${formattedDate}</li>
+          <li>Saat: ${appointment.appointment_time}</li>
+        </ul>
       `
-  })
+    });
+  } catch (error) {
+    console.error("Error sending appointment emails:", error);
+    throw error;
+  }
+}
+
+export async function sendPasswordResetEmailLink(email: string) {
+  try {
+    const transporter = await createTransporter();
+    // Kullanıcıyı kontrol et
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      throw new Error("Bu e-posta adresiyle kayıtlı bir kullanıcı bulunamadı");
+    }
+
+    // Benzersiz bir token oluştur
+    const resetToken = createHash('sha256')
+      .update(Math.random().toString())
+      .digest('hex');
+    
+    // Token'ın geçerlilik süresini 1 saat olarak ayarla
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 saat
+
+    // Token'ı veritabanına kaydet
+    await prisma.user.update({
+      where: { email },
+      data: {
+        resetToken,
+        resetTokenExpiry
+      }
+    });
+
+    // Reset URL'ini oluştur
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sifre-sifirla/${resetToken}`;
+
+    // E-posta içeriği
+    const emailContent = `
+      <h1>Şifre Sıfırlama İsteği</h1>
+      <p>Merhaba,</p>
+      <p>Hesabınız için bir şifre sıfırlama isteği aldık. Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+      <a href="${resetUrl}" style="display: inline-block; background-color: #ef4444; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Şifremi Sıfırla</a>
+      <p>Bu bağlantı 1 saat süreyle geçerlidir.</p>
+      <p>Eğer bu isteği siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.</p>
+      <p>Saygılarımızla,<br>Advicemy.com</p>
+    `;
+
+    // E-postayı gönder
+    await transporter.sendMail({
+      from: `"Advicemy" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Şifre Sıfırlama İsteği",
+      html: emailContent
+    });
+
+  } catch (error) {
+    console.error('Password reset error:', error);
+    throw error;
+  }
 } 

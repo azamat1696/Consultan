@@ -3,7 +3,7 @@ import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
 import prisma from './lib/db';
 
-const publicRoutes = ['/signin', '/kayit-ol', '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*','/kategoriler/*','/nasil-calisiyor','/hakkimizda']; // Define public routes
+const publicRoutes = ['/signin','/sifre-sifirla','/sifremi-unuttum','/kayit-ol', '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*','/kategoriler/*','/nasil-calisiyor','/hakkimizda']; // Define public routes
 const roleBasedRoutes = {
     admin: ['/admin'],
     consultant: ['/consultant'],

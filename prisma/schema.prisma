@@ -29,6 +29,8 @@ model User {
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
   logs                        Log[]
+  resetToken                  String?   @db.VarChar(255)
+  resetTokenExpiry            DateTime?
 
   educations               Education[]
   certificates             Certificate[]

@@ -19,16 +19,24 @@ export default function ConsultantRegistrationSection() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // Check if passwords match
-        if (formData.password !== formData.passwordConfirm) {
-            return alert("Şifreler uyuşmuyor")
-        }
-        // API call to register consultant
-        const data = await registerConsultant(formData)
-        if (data) {
-            console.log("Consultant registered successfully")
-            toast.success("Danışman kaydı başarıyla tamamlandı")
-           return  router.push("/signin")
+        try {
+            // Check if passwords match
+            if (formData.password !== formData.passwordConfirm) {
+                toast.error("Şifreler uyuşmuyor");
+                return;
+            }
+
+            // API call to register consultant
+            const data = await registerConsultant(formData);
+
+            if (data) {
+                console.log("Consultant registered successfully");
+                toast.success("Danışman kaydı başarıyla tamamlandı");
+                return router.push("/signin");
+            }
+        } catch (error: any) {
+            // Hata mesajını göster
+            toast.error(error.message || "Kayıt sırasında bir hata oluştu");
         }
     }
 

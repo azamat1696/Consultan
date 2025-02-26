@@ -4,32 +4,47 @@ import { hashPassword } from "@/lib/password";
 import { sendNewConsultantNotification } from "@/lib/mail";
 
 export async function registerConsultant(formData: any) {
-    // Hash password before saving
-    const hashedPassword = await hashPassword(formData.password);
+    try {
+        // Önce email kontrolü yapalım
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: formData.email
+            }
+        });
 
-    const user = await prisma.user.create({
-        data: {
-            email: formData.email,
-            password: hashedPassword,
-            role: 'consultant',
-            status: false,
+        if (existingUser) {
+            throw new Error("Bu email adresi zaten kullanımda!");
         }
-    });
 
-    // Get admin users
-    const adminUsers = await prisma.user.findMany({
-        where: { role: 'admin' }
-    });
+        // Hash password before saving
+        const hashedPassword = await hashPassword(formData.password);
 
-    // Send notification to each admin
-    for (const admin of adminUsers) {
-        if (admin.email) {
-            await sendNewConsultantNotification(admin.email, {
+        const user = await prisma.user.create({
+            data: {
                 email: formData.email,
-                id: user.id
-            });
-        }
-    }
+                password: hashedPassword,
+                role: 'consultant',
+                status: false,
+            }
+        });
 
-    return user;
+        // Get admin users
+        const adminUsers = await prisma.user.findMany({
+            where: { role: 'admin' }
+        });
+
+        // Send notification to each admin
+        for (const admin of adminUsers) {
+            if (admin.email) {
+                await sendNewConsultantNotification(admin.email, {
+                    email: formData.email,
+                    id: user.id
+                });
+            }
+        }
+
+        return user;
+    } catch (error) {
+        throw error;
+    }
 }

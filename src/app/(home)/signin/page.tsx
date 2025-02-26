@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {signIn, useSession} from "next-auth/react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 export default function LoginPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState({
         email: "",
         password: "",
     })
-
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         await signIn("credentials", {
@@ -24,11 +26,12 @@ export default function LoginPage() {
             console.error("Giriş hatası:", error)
             toast.error("Giriş bilgilerinizi kontrol ediniz")
         }).then((response) => {
-            console.log(response)
+            
             if (response?.error) {
                 toast.error("Giriş bilgilerinizi kontrol ediniz")
             } else {
                 toast.success("Giriş başarılı")
+                router.push("/")
             }
         });
     }
@@ -92,7 +95,7 @@ export default function LoginPage() {
                             </div>
                             <div className="text-right mt-2">
                                 <Link
-                                    href="/forgot-password"
+                                    href="/sifremi-unuttum"
                                     className="text-sm text-blue-600 hover:text-blue-800"
                                 >
                                     Şifremi Unuttum
@@ -122,6 +125,7 @@ export default function LoginPage() {
                 </form>
 
                 {/* Sosyal Medya ile Giriş */}
+                {/*
                 <div className="mt-6">
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
@@ -133,8 +137,9 @@ export default function LoginPage() {
               </span>
                         </div>
                     </div>
+                */}
 
-                    <div className="mt-6 grid grid-cols-2 gap-3">
+                 {/*   <div className="mt-6 grid grid-cols-2 gap-3">
                         <Button
                             type="button"
                             className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
@@ -160,8 +165,8 @@ export default function LoginPage() {
                             </svg>
                             <span className="ml-2">GitHub</span>
                         </Button>
-                    </div>
-                </div>
+                    </div> 
+                    */}
             </div>
         </div>
     )
