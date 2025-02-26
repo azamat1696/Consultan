@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import {registerClient} from "@/app/(home)/kayit-ol/action";
 import {useRouter} from "next/navigation";
+import toast from "react-hot-toast"
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
@@ -53,6 +54,7 @@ export default function RegisterPage() {
         if (!validateForm()) return
        const data = await registerClient(formData)
        if (data) {
+          toast.success("Kayıt başarılı bir şekilde gerçekleştirildi.")
           return router.push('/login')
        }
     }

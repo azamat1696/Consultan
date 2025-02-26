@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { sendNewConsultantNotification } from "@/lib/mail";
 
-export async function registerConsultant(formData: any) {
+export async function registerConsultant(formData: any): Promise<{ success: boolean, message: string }> {
     try {
         // Önce email kontrolü yapalım
         const existingUser = await prisma.user.findUnique({
@@ -13,7 +13,10 @@ export async function registerConsultant(formData: any) {
         });
 
         if (existingUser) {
-            throw new Error("Bu email adresi zaten kullanımda!");
+            return {
+                success: false,
+                message: "Bu email adresi zaten kullanımda!"
+            }
         }
 
         // Hash password before saving
@@ -43,8 +46,14 @@ export async function registerConsultant(formData: any) {
             }
         }
 
-        return user;
+        return {
+            success: true,
+            message: "Danışman kaydı başarıyla tamamlandı"
+        };
     } catch (error) {
-        throw error;
+        return {
+            success: false,
+            message: "Bir hata oluştu"
+        };
     }
 }

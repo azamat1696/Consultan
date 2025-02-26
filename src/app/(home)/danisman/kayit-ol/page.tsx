@@ -29,10 +29,12 @@ export default function ConsultantRegistrationSection() {
             // API call to register consultant
             const data = await registerConsultant(formData);
 
-            if (data) {
-                console.log("Consultant registered successfully");
-                toast.success("Danışman kaydı başarıyla tamamlandı");
+            
+            if (data.success) {
+                toast.success(data.message);
                 return router.push("/signin");
+            } else {
+                toast.error(data.message);
             }
         } catch (error: any) {
             // Hata mesajını göster
