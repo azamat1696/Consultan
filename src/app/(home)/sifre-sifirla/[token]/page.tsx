@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { resetPassword } from "./action"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
-
-export default function ResetPasswordPage({ params }: { params: { token: string } }) {
+import { useParams } from "next/navigation"
+export default function ResetPasswordPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -16,7 +16,7 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
         password: "",
         passwordConfirm: ""
     })
-
+    const params = useParams()
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
@@ -27,7 +27,7 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
                 return
             }
 
-            await resetPassword(params.token, formData.password)
+            await resetPassword(params.token as string, formData.password)
             toast.success("Şifreniz başarıyla değiştirildi")
             router.push("/signin")
         } catch (error: any) {
