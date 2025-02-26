@@ -8,8 +8,9 @@ import {
     faVideoCamera
 } from "@fortawesome/free-solid-svg-icons";
 import {faCheckCircle, faComment, faCreditCard} from "@fortawesome/free-regular-svg-icons";
-
+import {sendPasswordResetEmail} from "@/lib/mail";
 export default async function Home() {
+    await sendPasswordResetEmail("azamat1696@gmail.com", "123456", "Aziz");
   return (
       <>
           <Slider/>
