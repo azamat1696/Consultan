@@ -7,37 +7,53 @@ import { createLog } from "@/lib/logger";
 
 async function saveImage(base64Image: string): Promise<string> {
   try {
-    // Remove the data:image/[type];base64, prefix
+    // Eğer zaten bir URL ise
+    if (!base64Image.startsWith('data:image')) {
+      return base64Image;
+    }
+
+    // Base64 formatını kontrol et
+    const base64Regex = /^data:image\/(jpeg|jpg|png|gif);base64,/;
+    if (!base64Regex.test(base64Image)) {
+      throw new Error('Geçersiz görsel formatı');
+    }
+
+    // Base64'den buffer'a çevir
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // Create uploads directory if it doesn't exist
+    // Dosya uzantısını al
+    const extension = base64Image.split(';')[0].split('/')[1];
+    
+    // Klasör oluştur
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'sliders');
     await fs.mkdir(uploadsDir, { recursive: true });
 
-    // Generate unique filename
+    // Benzersiz dosya adı oluştur
     const uniqueId = crypto.randomUUID();
-    const extension = base64Image.substring(base64Image.indexOf('/') + 1, base64Image.indexOf(';'));
     const filename = `slider-${uniqueId}.${extension}`;
     const filepath = path.join(uploadsDir, filename);
 
-    // Save the file
+    // Dosyayı kaydet
     await fs.writeFile(filepath, buffer);
 
-    // Return the public URL
     return `/uploads/sliders/${filename}`;
   } catch (error) {
     console.error('Error saving image:', error);
-    throw error;
+    throw new Error('Görsel kaydedilirken bir hata oluştu');
   }
 }
 
 async function deleteImage(imageUrl: string) {
   try {
-    if (!imageUrl) return;
+    if (!imageUrl || !imageUrl.startsWith('/uploads/sliders/')) return;
 
     const filepath = path.join(process.cwd(), 'public', imageUrl);
-    await fs.unlink(filepath);
+    const exists = await fs.access(filepath).then(() => true).catch(() => false);
+    
+    if (exists) {
+      await fs.unlink(filepath);
+    }
   } catch (error) {
     console.error('Error deleting image:', error);
   }
@@ -61,6 +77,7 @@ export async function addSlider(data: any) {
   try {
     let imageUrl = '';
     let mobileImageUrl = '';
+    
     if (data.image) {
       imageUrl = await saveImage(data.image);
     }
@@ -98,7 +115,6 @@ export async function addSlider(data: any) {
 
 export async function updateSlider(id: number, data: any) {
   try {
-    // Get the current slider to check if we need to delete old image
     const currentSlider = await prisma.slider.findUnique({
       where: { id }
     });
@@ -106,13 +122,10 @@ export async function updateSlider(id: number, data: any) {
     let imageUrl = data.image;
     let mobileImageUrl = data.mobileImage;
     
-    // If new image is provided and it's different from current
     if (data.image && data.image !== currentSlider?.image && data.image.startsWith('data:image')) {
-      // Delete old image if exists
       if (currentSlider?.image) {
         await deleteImage(currentSlider.image);
       }
-      // Save new image
       imageUrl = await saveImage(data.image);
     }
 

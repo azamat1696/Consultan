@@ -18,7 +18,7 @@ async function main() {
       data: {
         name: "Admin",
         surname: "Kullanıcı",
-        email: "admin@example.com",
+        email: "admin@example.com", //azamat1616@gmail.com $2a$10$bEI7DOdH2ix989Wf6cl5Ve1Gsn6Gds0KaoElyd9Y9KN07ncn41H.K
         password: await hashPassword("123456"),
         role: "admin",
         gender: Gender.male,

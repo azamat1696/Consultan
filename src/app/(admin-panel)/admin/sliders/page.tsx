@@ -96,6 +96,30 @@ export default function SlidersPage() {
     setFilteredSliders(sliders);
   }, [sliders]);
 
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'image' | 'mobileImage') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error('Dosya boyutu 8MB\'dan büyük olamaz');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast.error('Lütfen geçerli bir görsel dosyası seçin');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: reader.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -131,11 +155,10 @@ export default function SlidersPage() {
               <TableCell>
                 {slider.image && (
                   <div className="relative w-20 h-20">
-                    <Image
+                    <img
                       src={slider.image}
                       alt={slider.title?.toString() || ""}
-                      fill
-                      className="object-cover rounded"
+                      className="object-cover rounded w-full h-full"
                     />
                   </div>
                 )}
@@ -228,27 +251,16 @@ export default function SlidersPage() {
                 type="file"
                 label="Görsel"
                 accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setFormData(prev => ({
-                        ...prev,
-                        image: reader.result as string
-                      }));
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                onChange={(e) => handleImageChange(e, 'image')}
               />
               {formData.image && (
                 <div className="relative w-full h-40">
                   <Image
-                    src={formData.image}
+                    src={formData.image.startsWith('data:') ? formData.image : formData.image}
                     alt="Preview"
                     fill
                     className="object-contain"
+                    unoptimized={formData.image.startsWith('data:')}
                   />
                 </div>
               )}
@@ -256,19 +268,7 @@ export default function SlidersPage() {
                 type="file"
                 label="Mobil Görsel"
                 accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setFormData(prev => ({
-                        ...prev,
-                        mobileImage: reader.result as string
-                      }));
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                onChange={(e) => handleImageChange(e, 'mobileImage')}
               />
               {formData.mobileImage && (
                 <div className="relative w-full h-40">

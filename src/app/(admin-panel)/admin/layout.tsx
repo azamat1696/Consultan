@@ -33,6 +33,7 @@ export default function RootLayout({
     <html lang="tr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 min-h-screen flex flex-col`}
+        cz-shortcut-listen="true"
       >
       <Provider>
            <AdminHeader/>

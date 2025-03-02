@@ -19,20 +19,15 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         await signIn("credentials", {
-            redirect: true,
+            redirect: false,
             email: formData.email,
             password: formData.password
         }).catch((error) => {
             console.error("Giriş hatası:", error)
             toast.error("Giriş bilgilerinizi kontrol ediniz")
         }).then((response) => {
-            
-            if (response?.error) {
-                toast.error("Giriş bilgilerinizi kontrol ediniz")
-            } else {
-                toast.success("Giriş başarılı")
-                router.push("/")
-            }
+             toast.success("Giriş başarılı")
+             router.push("/")
         });
     }
 

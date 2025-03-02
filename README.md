@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+DATABASE_URL="mysql://root:YeniSifre123!@localhost:3306/consulting"
+NEXTAUTH_SECRET="1h9GGJ0/jUO1kYTdPi4bMg/aSHAi6nq6IclD+5tyqCU="
+NEXTAUTH_URL="https://dancomy.com"
+SMTP_HOST="smtp.hostinger.com"
+SMTP_PORT= "465"
+SMTP_USER="info@terapist.life"
+SMTP_PASS="3224214.Mt"
+NEXT_PUBLIC_APP_URL="https://dancomy.com"
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+ENABLE_PAYMENTS=false
