@@ -104,11 +104,6 @@ export async function addSlider(data: any) {
     return slider;
   } catch (error) {
     console.error('Error adding slider:', error);
-    await createLog({
-      type: "ERROR",
-      action: "Slider Ekleme Hatası",
-      description: error instanceof Error ? error.message : "Bilinmeyen hata"
-    });
     throw error;
   }
 }
@@ -156,11 +151,6 @@ export async function updateSlider(id: number, data: any) {
     return slider;
   } catch (error) {
     console.error('Error updating slider:', error);
-    await createLog({
-      type: "ERROR",
-      action: "Slider Güncelleme Hatası",
-      description: error instanceof Error ? error.message : "Bilinmeyen hata"
-    });
     throw error;
   }
 }
