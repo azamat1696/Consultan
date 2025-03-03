@@ -26,7 +26,7 @@ async function saveImage(base64Image: string): Promise<string> {
     const extension = base64Image.split(';')[0].split('/')[1];
     
     // Klasör oluştur
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'sliders');
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'sliders');
     await fs.mkdir(uploadsDir, { recursive: true });
 
     // Benzersiz dosya adı oluştur
@@ -48,7 +48,7 @@ async function deleteImage(imageUrl: string) {
   try {
     if (!imageUrl || !imageUrl.startsWith('/uploads/sliders/')) return;
 
-    const filepath = path.join(process.cwd(), 'public', imageUrl);
+    const filepath = path.join(process.cwd(), imageUrl);
     const exists = await fs.access(filepath).then(() => true).catch(() => false);
     
     if (exists) {
