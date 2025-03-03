@@ -9,6 +9,7 @@ import { PlusIcon, EditIcon, DeleteIcon, SearchIcon } from "@/components/icons";
 import { getSliders, addSlider, updateSlider, deleteSlider } from "./actions";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { UploadButton } from "@/lib/uploadthing";
 
 interface Slider {
   id: number;
@@ -34,6 +35,14 @@ export default function SlidersPage() {
     status: true,
   });
   const [editingId, setEditingId] = React.useState<number | null>(null);
+  const [uploadingStates, setUploadingStates] = React.useState({
+    image: false, 
+    mobileImage: false
+  });
+  const [uploadProgress, setUploadProgress] = React.useState({
+    image: 0,
+    mobileImage: 0
+  });
 
   const fetchSliders = async () => {
     try {
@@ -67,6 +76,12 @@ export default function SlidersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (uploadingStates.image || uploadingStates.mobileImage) {
+      toast.error("Lütfen görsel yüklenmesinin tamamlanmasını bekleyin");
+      return;
+    }
+
     try {
       if (editingId) {
         await updateSlider(editingId, formData);
@@ -96,27 +111,26 @@ export default function SlidersPage() {
     setFilteredSliders(sliders);
   }, [sliders]);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'image' | 'mobileImage') => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 8 * 1024 * 1024) {
-        toast.error('Dosya boyutu 8MB\'dan büyük olamaz');
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        toast.error('Lütfen geçerli bir görsel dosyası seçin');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
+  const handleImageUpload = (fieldName: 'image' | 'mobileImage') => async (res: any) => {
+    try {
+      if (res?.[0]?.url) {
         setFormData(prev => ({
           ...prev,
-          [fieldName]: reader.result as string
+          [fieldName]: res[0].url
         }));
-      };
-      reader.readAsDataURL(file);
+        toast.success('Görsel başarıyla yüklendi');
+      }
+    } catch (error) {
+      toast.error('Görsel yükleme hatası');
+    } finally {
+      setUploadingStates(prev => ({
+        ...prev,
+        [fieldName]: false
+      }));
+      setUploadProgress(prev => ({
+        ...prev,
+        [fieldName]: 0
+      }));
     }
   };
 
@@ -155,8 +169,9 @@ export default function SlidersPage() {
               <TableCell>
                 {slider.image && (
                   <div className="relative w-20 h-20">
-                    <img
+                    <Image
                       src={slider.image}
+                      fill
                       alt={slider.title?.toString() || ""}
                       className="object-cover rounded w-full h-full"
                     />
@@ -247,39 +262,124 @@ export default function SlidersPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
-              <Input
-                type="file"
-                label="Görsel"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, 'image')}
-              />
-              {formData.image && (
-                <div className="relative w-full h-40">
-                  <Image
-                    src={formData.image.startsWith('data:') ? formData.image : formData.image}
-                    alt="Preview"
-                    fill
-                    className="object-contain"
-                    unoptimized={formData.image.startsWith('data:')}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Görsel
+                </label>
+                <div className="relative">
+                  <UploadButton
+                    endpoint="imageUploader"
+                    onUploadProgress={(progress: number) => {
+                      setUploadProgress(prev => ({
+                        ...prev,
+                        image: progress
+                      }));
+                    }}
+                    onClientUploadComplete={handleImageUpload('image')}
+                    onUploadError={(error: Error) => {
+                      setUploadingStates(prev => ({
+                        ...prev,
+                        image: false
+                      }));
+                      toast.error(`Görsel yükleme hatası: ${error.message}`);
+                    }}
+                    onUploadBegin={() => {
+                      setUploadingStates(prev => ({
+                        ...prev,
+                        image: true
+                      }));
+                      setUploadProgress(prev => ({
+                        ...prev,
+                        image: 0
+                      }));
+                    }}
+                    disabled={uploadingStates.image || uploadingStates.mobileImage}
                   />
+                  {uploadingStates.image && (
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress.image}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Yükleniyor... {uploadProgress.image}%
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-              <Input
-                type="file"
-                label="Mobil Görsel"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, 'mobileImage')}
-              />
-              {formData.mobileImage && (
-                <div className="relative w-full h-40">
-                  <Image
-                    src={formData.mobileImage}
-                    alt="Mobile Preview"
-                    fill
-                    className="object-contain"
+                {formData.image && !uploadingStates.image && (
+                  <div className="relative w-full h-40">
+                    <Image
+                      src={formData.image}
+                      alt="Preview"
+                      fill
+                      className="object-contain w-full h-full"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Mobil Görsel
+                </label>
+                <div className="relative">
+                  <UploadButton
+                    endpoint="imageUploader"
+                    onUploadProgress={(progress: number) => {
+                      setUploadProgress(prev => ({
+                        ...prev,
+                        mobileImage: progress
+                      }));
+                    }}
+                    onClientUploadComplete={handleImageUpload('mobileImage')}
+                    onUploadError={(error: Error) => {
+                      setUploadingStates(prev => ({
+                        ...prev,
+                        mobileImage: false
+                      }));
+                      toast.error(`Görsel yükleme hatası: ${error.message}`);
+                    }}
+                    onUploadBegin={() => {
+                      setUploadingStates(prev => ({
+                        ...prev,
+                        mobileImage: true
+                      }));
+                      setUploadProgress(prev => ({
+                        ...prev,
+                        mobileImage: 0
+                      }));
+                    }}
+                    disabled={uploadingStates.image || uploadingStates.mobileImage}
                   />
+                  {uploadingStates.mobileImage && (
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress.mobileImage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Yükleniyor... {uploadProgress.mobileImage}%
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
+                {formData.mobileImage && !uploadingStates.mobileImage && (
+                  <div className="relative w-full h-40">
+                    <Image
+                      src={formData.mobileImage}
+                      alt="Mobile Preview"
+                      fill
+                      className="object-contain w-full h-full"
+                    />
+                  </div>
+                )}
+              </div>
+
               <Switch
                 isSelected={formData.status}
                 onValueChange={(checked) => setFormData({ ...formData, status: checked })}
@@ -287,11 +387,22 @@ export default function SlidersPage() {
                 {formData.status ? "Aktif" : "Pasif"}
               </Switch>
               <div className="flex justify-end gap-2">
-                <Button variant="flat" color="danger" onPress={handleClose}>
+                <Button 
+                  variant="flat" 
+                  color="danger" 
+                  onPress={handleClose}
+                  isDisabled={uploadingStates.image || uploadingStates.mobileImage}
+                >
                   İptal
                 </Button>
-                <Button color="primary" type="submit">
-                  {editingId ? "Güncelle" : "Ekle"}
+                <Button 
+                  color="primary" 
+                  type="submit"
+                  isDisabled={uploadingStates.image || uploadingStates.mobileImage}
+                >
+                  {uploadingStates.image || uploadingStates.mobileImage ? 
+                    "Yükleniyor..." : 
+                    (editingId ? "Güncelle" : "Ekle")}
                 </Button>
               </div>
             </form>

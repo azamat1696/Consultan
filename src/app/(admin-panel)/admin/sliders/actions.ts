@@ -4,6 +4,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { createLog } from "@/lib/logger";
+import { UTApi } from "uploadthing/server";
+
+const utapi = new UTApi();
 
 async function saveImage(base64Image: string): Promise<string> {
   try {
@@ -59,6 +62,21 @@ async function deleteImage(imageUrl: string) {
   }
 }
 
+async function deleteUploadThingImage(imageUrl: string | null) {
+  if (!imageUrl) return;
+  
+  try {
+    // URL'den dosya key'ini çıkar
+    const fileKey = imageUrl.split('/').pop();
+    if (fileKey) {
+      await utapi.deleteFiles(fileKey);
+      console.log('Image deleted from UploadThing:', fileKey);
+    }
+  } catch (error) {
+    console.error('Error deleting image from UploadThing:', error);
+  }
+}
+
 export async function getSliders() {
   try {
     return await prisma.slider.findMany({
@@ -75,22 +93,12 @@ export async function getSliders() {
 
 export async function addSlider(data: any) {
   try {
-    let imageUrl = '';
-    let mobileImageUrl = '';
-    
-    if (data.image) {
-      imageUrl = await saveImage(data.image);
-    }
-    if (data.mobileImage) {
-      mobileImageUrl = await saveImage(data.mobileImage);
-    }
-
     const slider = await prisma.slider.create({
       data: {
         title: data.title,
         description: data.description,
-        image: imageUrl,
-        mobileImage: mobileImageUrl,
+        image: data.image,
+        mobileImage: data.mobileImage,
         status: data.status,
       }
     });
@@ -104,45 +112,39 @@ export async function addSlider(data: any) {
     return slider;
   } catch (error) {
     console.error('Error adding slider:', error);
-    await createLog({
-      type: "ERROR",
-      action: "Slider Ekleme Hatası",
-      description: error instanceof Error ? error.message : "Bilinmeyen hata"
-    });
     throw error;
   }
 }
 
 export async function updateSlider(id: number, data: any) {
   try {
-    const currentSlider = await prisma.slider.findUnique({
+    // Önce mevcut slider'ı al
+    const existingSlider = await prisma.slider.findUnique({
       where: { id }
     });
 
-    let imageUrl = data.image;
-    let mobileImageUrl = data.mobileImage;
-    
-    if (data.image && data.image !== currentSlider?.image && data.image.startsWith('data:image')) {
-      if (currentSlider?.image) {
-        await deleteImage(currentSlider.image);
-      }
-      imageUrl = await saveImage(data.image);
+    if (!existingSlider) {
+      throw new Error('Slider bulunamadı');
     }
 
-    if (data.mobileImage && data.mobileImage !== currentSlider?.mobileImage && data.mobileImage.startsWith('data:image')) {
-      if (currentSlider?.mobileImage) {
-        await deleteImage(currentSlider.mobileImage);
-      }
-      mobileImageUrl = await saveImage(data.mobileImage);
+    // Eğer yeni bir görsel yüklendiyse, eski görseli sil
+    if (data.image !== existingSlider.image) {
+      await deleteUploadThingImage(existingSlider.image);
     }
 
+    // Eğer yeni bir mobil görsel yüklendiyse, eski mobil görseli sil
+    if (data.mobileImage !== existingSlider.mobileImage) {
+      await deleteUploadThingImage(existingSlider.mobileImage);
+    }
+
+    // Slider'ı güncelle
     const slider = await prisma.slider.update({
       where: { id },
       data: {
         title: data.title,
         description: data.description,
-        image: imageUrl,
-        mobileImage: mobileImageUrl,
+        image: data.image,
+        mobileImage: data.mobileImage,
         status: data.status,
       }
     });
@@ -156,18 +158,27 @@ export async function updateSlider(id: number, data: any) {
     return slider;
   } catch (error) {
     console.error('Error updating slider:', error);
-    await createLog({
-      type: "ERROR",
-      action: "Slider Güncelleme Hatası",
-      description: error instanceof Error ? error.message : "Bilinmeyen hata"
-    });
     throw error;
   }
 }
 
 export async function deleteSlider(id: number) {
   try {
-    const slider = await prisma.slider.update({
+    // Önce slider'ı al
+    const slider = await prisma.slider.findUnique({
+      where: { id }
+    });
+
+    if (!slider) {
+      throw new Error('Slider bulunamadı');
+    }
+
+    // Görselleri Uploadthing'den sil
+    await deleteUploadThingImage(slider.image);
+    await deleteUploadThingImage(slider.mobileImage);
+
+    // Slider'ı veritabanından sil (veya soft delete)
+    const deletedSlider = await prisma.slider.update({
       where: { id },
       data: {
         deletedAt: new Date()
@@ -180,7 +191,7 @@ export async function deleteSlider(id: number) {
       description: `ID: ${id} slider silindi.`
     });
 
-    return slider;
+    return deletedSlider;
   } catch (error) {
     console.error('Error deleting slider:', error);
     await createLog({

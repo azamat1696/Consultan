@@ -9,6 +9,7 @@ import { revalidateTag } from "next/cache";
 import { hashPassword } from "@/lib/password";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { UTApi } from "uploadthing/server";
 
 interface GetUsersParams {
   search?: string;
@@ -36,6 +37,8 @@ interface SessionUser {
     id: number;
   }
 }
+
+const utapi = new UTApi();
 
 export async function getUsers(params: GetUsersParams = { search: "", role: null, skip: 0, take: 10 }) {
   try {
@@ -133,26 +136,39 @@ export async function addUser(data: CreateUserData) {
   }
 }
 
+async function deleteProfileImage(imageUrl: string | null) {
+  if (!imageUrl) return;
+  
+  try {
+    const fileKey = imageUrl.split('/').pop();
+    if (fileKey) {
+      await utapi.deleteFiles(fileKey);
+      console.log('Profile image deleted from UploadThing:', fileKey);
+    }
+  } catch (error) {
+    console.error('Error deleting profile image from UploadThing:', error);
+  }
+}
+
 export async function updateUser(id: number, data: Partial<CreateUserData>) {
   try {
-    let imageUrl = data.profile_image;
-    if (data.profile_image instanceof File) {
-      imageUrl = await saveImage(data.profile_image);
+    // Mevcut kullanıcıyı al
+    const existingUser = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!existingUser) {
+      throw new Error('Kullanıcı bulunamadı');
+    }
+
+    // Eğer yeni bir profil resmi yüklendiyse, eskisini sil
+    if (data.profile_image !== existingUser.profile_image) {
+      await deleteProfileImage(existingUser.profile_image);
     }
 
     const user = await prisma.user.update({
       where: { id },
-      data: {
-        name: data.name,
-        surname: data.surname,
-        email: data.email,
-        role: data.role,
-        slug: data.slug,
-        status: data.status,
-        profile_image: imageUrl,
-        gender: data.gender,
-        phone: data.phone,
-      }
+      data
     });
 
     await createLog({
@@ -175,11 +191,20 @@ export async function updateUser(id: number, data: Partial<CreateUserData>) {
 
 export async function deleteUser(id: number) {
   try {
-    const user = await prisma.user.update({
-      where: { id },
-      data: {
-        deletedAt: new Date()
-      }
+    const user = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!user) {
+      throw new Error('Kullanıcı bulunamadı');
+    }
+
+    // Profil resmini sil
+    await deleteProfileImage(user.profile_image);
+
+    // Kullanıcıyı sil
+    await prisma.user.delete({
+      where: { id }
     });
 
     await createLog({
@@ -188,7 +213,7 @@ export async function deleteUser(id: number) {
       description: `ID: ${id} kullanıcı silindi.`
     });
 
-    return user;
+    return true;
   } catch (error) {
     console.error('Error deleting user:', error);
     await createLog({
