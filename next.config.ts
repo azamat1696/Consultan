@@ -25,6 +25,16 @@ images: {
       protocol: 'https',
       port: '',
     },
+    {
+      hostname: 'utfs.io',
+      protocol: 'https',
+      port: '',
+    },
+    {
+      hostname: 'uploadthing.com',
+      protocol: 'https',
+      port: '',
+    },
   ],
 },
 

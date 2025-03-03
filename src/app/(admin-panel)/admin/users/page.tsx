@@ -27,6 +27,9 @@ import { generateSlug } from "@/lib/slug";
 import { PaginationMeta } from "@/types/index";
 import { SearchIcon, PlusIcon, EditIcon, DeleteIcon, KeyIcon, UserIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
+import { UploadButton } from "@uploadthing/react";
+import { OurFileRouter } from "@/app/api/uploadthing/core";
+import Image from "next/image";
 
 const roleTranslations = {
   admin: "Yönetici",
@@ -68,6 +71,9 @@ export default function UsersTable() {
     userId: null as number | null,
   });
   const [newPassword, setNewPassword] = React.useState("");
+
+  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
 
   const router = useRouter();
 
@@ -211,6 +217,23 @@ export default function UsersTable() {
       surname: newSurname,
       slug: generateUserSlug(formData.name || "", newSurname)
     }));
+  };
+
+  const handleImageUpload = async (res: any) => {
+    try {
+      if (res?.[0]?.url) {
+        setFormData(prev => ({
+          ...prev,
+          profile_image: res[0].url
+        }));
+        toast.success('Profil resmi başarıyla yüklendi');
+      }
+    } catch (error) {
+      toast.error('Profil resmi yükleme hatası');
+    } finally {
+      setUploadingImage(false);
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -359,33 +382,67 @@ export default function UsersTable() {
                   <SelectItem key="consultant" value="consultant">Danışman</SelectItem>
                   <SelectItem key="admin" value="admin">Admin</SelectItem>
                 </Select>
-                <Input
-                  type="file"
-                  label="Profil Resmi"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData(prev => ({
-                          ...prev,
-                          profile_image: reader.result as string
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-                {formData.profile_image && (
-                  <div className="relative w-20 h-20">
-                    <img
-                      src={formData.profile_image}
-                      alt="Profile Preview"
-                      className="w-full h-full object-cover rounded-full"
-                    />
+                <div className="space-y-2 col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Profil Resmi
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <UploadButton<OurFileRouter, "imageUploader">
+                        endpoint="imageUploader"
+                        onUploadProgress={(progress: number) => {
+                          setUploadProgress(progress);
+                        }}
+                        onClientUploadComplete={handleImageUpload}
+                        onUploadError={(error: Error) => {
+                          setUploadingImage(false);
+                          toast.error(`Profil resmi yükleme hatası: ${error.message}`);
+                        }}
+                        onUploadBegin={() => {
+                          setUploadingImage(true);
+                          setUploadProgress(0);
+                        }}
+                        appearance={{
+                          button: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg",
+                          allowedContent: "text-gray-500 text-sm",
+                        }}
+                        content={{
+                          button({ ready }: { ready: boolean }) {
+                            if (ready) return 'Resmi Seç';
+                            return 'Yükleniyor...';
+                          },
+                          allowedContent({ ready, fileTypes }: { ready: boolean, fileTypes: string[] }) {
+                            if (!ready) return 'Yükleniyor...';
+                            return `${fileTypes.join(', ')} dosyaları, max 8MB`;
+                          },
+                        }}
+                      />
+                      {uploadingImage && (
+                        <div className="mt-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Yükleniyor... {uploadProgress}%
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {formData.profile_image && !uploadingImage && (
+                      <div className="relative w-24 h-24 flex-shrink-0">
+                        <Image
+                          src={formData.profile_image}
+                          alt="Profile Preview"
+                          fill
+                          className="object-cover rounded-full"
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
                 <Select
                   label="Durum"
                   selectedKeys={[formData.status ? 'active' : 'passive']}
@@ -402,11 +459,20 @@ export default function UsersTable() {
                 />
               </div>
               <div className="flex justify-end gap-2 mt-4">
-                <Button color="danger" variant="flat" onPress={onClose}>
+                <Button 
+                  color="danger" 
+                  variant="flat" 
+                  onPress={onClose}
+                  isDisabled={uploadingImage}
+                >
                   İptal
                 </Button>
-                <Button color="primary" type="submit">
-                  Kaydet
+                <Button 
+                  color="primary" 
+                  type="submit"
+                  isDisabled={uploadingImage}
+                >
+                  {uploadingImage ? "Yükleniyor..." : "Kaydet"}
                 </Button>
               </div>
             </Form>
