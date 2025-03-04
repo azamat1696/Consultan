@@ -105,9 +105,12 @@ export default function UsersTable() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData);
     try {
       if (editingUser) {
+        
         await updateUser(editingUser.id, formData as User);
+
         toast.success("Kullanıcı başarıyla güncellendi");
       } else {
         const userData = {
@@ -217,23 +220,6 @@ export default function UsersTable() {
       surname: newSurname,
       slug: generateUserSlug(formData.name || "", newSurname)
     }));
-  };
-
-  const handleImageUpload = async (res: any) => {
-    try {
-      if (res?.[0]?.url) {
-        setFormData(prev => ({
-          ...prev,
-          profile_image: res[0].url
-        }));
-        toast.success('Profil resmi başarıyla yüklendi');
-      }
-    } catch (error) {
-      toast.error('Profil resmi yükleme hatası');
-    } finally {
-      setUploadingImage(false);
-      setUploadProgress(0);
-    }
   };
 
   return (
@@ -388,50 +374,34 @@ export default function UsersTable() {
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <UploadButton<OurFileRouter, "imageUploader">
-                        endpoint="imageUploader"
-                        onUploadProgress={(progress: number) => {
-                          setUploadProgress(progress);
-                        }}
-                        onClientUploadComplete={handleImageUpload}
-                        onUploadError={(error: Error) => {
-                          setUploadingImage(false);
-                          toast.error(`Profil resmi yükleme hatası: ${error.message}`);
-                        }}
-                        onUploadBegin={() => {
-                          setUploadingImage(true);
-                          setUploadProgress(0);
-                        }}
-                        appearance={{
-                          button: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg",
-                          allowedContent: "text-gray-500 text-sm",
-                        }}
-                        content={{
-                          button({ ready }: { ready: boolean }) {
-                            if (ready) return 'Resmi Seç';
-                            return 'Yükleniyor...';
-                          },
-                          allowedContent({ ready, fileTypes }: { ready: boolean, fileTypes: string[] }) {
-                            if (!ready) return 'Yükleniyor...';
-                            return `${fileTypes.join(', ')} dosyaları, max 8MB`;
-                          },
-                        }}
-                      />
-                      {uploadingImage && (
-                        <div className="mt-2">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div 
-                              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                              style={{ width: `${uploadProgress}%` }}
-                            ></div>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Yükleniyor... {uploadProgress}%
-                          </p>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-4 relative">
+                        <Image
+                          src={formData.profile_image || ""} 
+                          alt="Profile"
+                          fill
+                          className="w-24 h-24 rounded-full object-cover bg-gray-100"
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setFormData({
+                                  ...formData,
+                                  profile_image: reader.result as string
+                                });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </div>
+            
                     </div>
-                    {formData.profile_image && !uploadingImage && (
+                    {formData.profile_image && (
                       <div className="relative w-24 h-24 flex-shrink-0">
                         <Image
                           src={formData.profile_image}

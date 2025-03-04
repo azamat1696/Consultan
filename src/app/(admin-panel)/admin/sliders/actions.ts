@@ -5,6 +5,12 @@ import path from 'path';
 import crypto from 'crypto';
 import { createLog } from "@/lib/logger";
 
+function getUploadPath(folder: string): string {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const basePath = isProduction ? '/var/www/uploads' : path.join(process.cwd(), 'public');
+  return path.join(basePath, folder);
+}
+
 async function saveImage(base64Image: string): Promise<string> {
   try {
     // Eğer zaten bir URL ise
@@ -26,7 +32,7 @@ async function saveImage(base64Image: string): Promise<string> {
     const extension = base64Image.split(';')[0].split('/')[1];
     
     // Klasör oluştur
-    const uploadsDir = '/var/www/uploads/sliders';
+    const uploadsDir = getUploadPath('uploads/sliders');
     await fs.mkdir(uploadsDir, { recursive: true });
 
     // Benzersiz dosya adı oluştur
@@ -46,13 +52,22 @@ async function saveImage(base64Image: string): Promise<string> {
 
 async function deleteImage(imageUrl: string) {
   try {
-    if (!imageUrl || !imageUrl.startsWith('/uploads/sliders/')) return;
+    if (!imageUrl) return;
 
-    const filepath = path.join('/var/www', imageUrl);
-    const exists = await fs.access(filepath).then(() => true).catch(() => false);
+    // Handle both local and external URLs
+    if (imageUrl.startsWith('http')) {
+      return; // Skip deletion for external URLs
+    }
+
+    // Extract filename from URL
+    const fileName = imageUrl.split('/').pop();
+    if (!fileName) return;
+
+    const filePath = path.join(getUploadPath('uploads/sliders'), fileName);
+    const exists = await fs.access(filePath).then(() => true).catch(() => false);
     
     if (exists) {
-      await fs.unlink(filepath);
+      await fs.unlink(filePath);
     }
   } catch (error) {
     console.error('Error deleting image:', error);

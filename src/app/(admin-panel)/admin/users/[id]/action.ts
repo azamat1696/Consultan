@@ -62,7 +62,7 @@ export async function contactInfoRegister(formData: any, id: number) {
     if (formData.image instanceof File) {
         try {
             // Create uploads directory if it doesn't exist
-            const uploadsDir = '/var/www/uploads/users';
+            const uploadsDir = process.env.UPLOADFILE_PATH + '/users';
             await fs.mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
@@ -1042,7 +1042,7 @@ async function saveImage(base64Image: string): Promise<string> {
         const buffer = Buffer.from(base64Data, 'base64');
 
         // Use absolute path for uploads
-        const uploadsDir = '/var/www/uploads/users';
+        const uploadsDir = process.env.UPLOADFILE_PATH + '/users';
         
         // Create directory if it doesn't exist
         await fs.mkdir(uploadsDir, { recursive: true });
@@ -1085,7 +1085,7 @@ export async function uploadFile(formData: FormData) {
         const buffer = Buffer.from(bytes)
 
         // Save to /var/www/uploads directory
-        const uploadDir = '/var/www/uploads'
+        const uploadDir = process.env.UPLOADFILE_PATH || '/var/www/uploads'
         const filename = `${Date.now()}-${file.name}`
         const filepath = path.join(uploadDir, filename)
 

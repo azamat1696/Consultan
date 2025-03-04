@@ -37,6 +37,12 @@ interface SessionUser {
   }
 }
 
+// Add this utility function at the top of the file
+function getUploadPath(folder: string): string {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const basePath = isProduction ? '/var/www/uploads' : path.join(process.cwd(), 'public');
+  return path.join(basePath, folder);
+}
 
 export async function getUsers(params: GetUsersParams = { search: "", role: null, skip: 0, take: 10 }) {
   try {
@@ -63,22 +69,41 @@ export async function getUsers(params: GetUsersParams = { search: "", role: null
   }
 }
 
-async function saveImage(file: File, prefix: string = 'user') {
+async function saveImage(fileOrBase64: File | string, prefix: string = 'user') {
   try {
-    const uploadsDir = '/var/www/uploads/users';
-    
-    // Create directory if it doesn't exist
+    const uploadsDir = getUploadPath('uploads/users');
     await fs.mkdir(uploadsDir, { recursive: true });
 
+    let buffer: Buffer;
+    let extension: string;
+
+    if (fileOrBase64 instanceof File) {
+      // Handle File object
+      buffer = Buffer.from(await fileOrBase64.arrayBuffer());
+      extension = path.extname(fileOrBase64.name);
+    } else {
+      // Handle base64 string
+      if (!fileOrBase64.startsWith('data:image')) {
+        return fileOrBase64; // Return as is if not a base64 image
+      }
+
+      // Extract extension from base64 string
+      const match = fileOrBase64.match(/^data:image\/(\w+);base64,/);
+      if (!match) {
+        throw new Error('Invalid base64 image format');
+      }
+      extension = match[1];
+
+      // Convert base64 to buffer
+      const base64Data = fileOrBase64.replace(/^data:image\/\w+;base64,/, '');
+      buffer = Buffer.from(base64Data, 'base64');
+    }
+
     const uniqueId = crypto.randomUUID();
-    const ext = path.extname(file.name);
-    const fileName = `${prefix}-${uniqueId}${ext}`;
+    const fileName = `${prefix}-${uniqueId}.${extension}`;
     const filePath = path.join(uploadsDir, fileName);
 
-    const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
-
-    // Return the URL path that will be stored in the database
     return `/uploads/users/${fileName}`;
   } catch (error) {
     console.error('Error saving image:', error);
@@ -143,7 +168,7 @@ async function deleteProfileImage(imageUrl: string | null) {
   try {
     const fileName = imageUrl.split('/').pop();
     if (fileName) {
-      const filePath = path.join('/var/www/uploads/users', fileName);
+      const filePath = path.join(getUploadPath('uploads/users'), fileName);
       await fs.unlink(filePath);
       console.log('Profile image deleted:', filePath);
     }
@@ -154,7 +179,6 @@ async function deleteProfileImage(imageUrl: string | null) {
 
 export async function updateUser(id: number, data: Partial<CreateUserData>) {
   try {
-    // Mevcut kullanıcıyı al
     const existingUser = await prisma.user.findUnique({
       where: { id }
     });
@@ -163,9 +187,13 @@ export async function updateUser(id: number, data: Partial<CreateUserData>) {
       throw new Error('Kullanıcı bulunamadı');
     }
 
-    // Eğer yeni bir profil resmi yüklendiyse, eskisini sil
-    if (data.profile_image !== existingUser.profile_image) {
+    // update profile image
+    if (data.profile_image && data.profile_image !== existingUser.profile_image) {
       await deleteProfileImage(existingUser.profile_image);
+      data.profile_image = await saveImage(data.profile_image);
+    } else {
+      // If no new image, keep the existing one
+      data.profile_image = existingUser.profile_image;
     }
 
     const user = await prisma.user.update({
