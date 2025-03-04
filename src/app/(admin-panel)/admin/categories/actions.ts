@@ -34,7 +34,8 @@ async function saveImage(base64Image: string): Promise<string> {
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
 
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'categories');
+    // Use absolute path for uploads
+    const uploadsDir = '/var/www/uploads/categories';
     await mkdir(uploadsDir, { recursive: true });
 
     const uniqueId = crypto.randomUUID();

@@ -9,7 +9,6 @@ import { revalidateTag } from "next/cache";
 import { hashPassword } from "@/lib/password";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { UTApi } from "uploadthing/server";
 
 interface GetUsersParams {
   search?: string;
@@ -38,7 +37,6 @@ interface SessionUser {
   }
 }
 
-const utapi = new UTApi();
 
 export async function getUsers(params: GetUsersParams = { search: "", role: null, skip: 0, take: 10 }) {
   try {
@@ -67,7 +65,9 @@ export async function getUsers(params: GetUsersParams = { search: "", role: null
 
 async function saveImage(file: File, prefix: string = 'user') {
   try {
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'users');
+    const uploadsDir = '/var/www/uploads/users';
+    
+    // Create directory if it doesn't exist
     await fs.mkdir(uploadsDir, { recursive: true });
 
     const uniqueId = crypto.randomUUID();
@@ -78,10 +78,11 @@ async function saveImage(file: File, prefix: string = 'user') {
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filePath, buffer);
 
+    // Return the URL path that will be stored in the database
     return `/uploads/users/${fileName}`;
   } catch (error) {
     console.error('Error saving image:', error);
-    return null;
+    throw error;
   }
 }
 
@@ -140,13 +141,14 @@ async function deleteProfileImage(imageUrl: string | null) {
   if (!imageUrl) return;
   
   try {
-    const fileKey = imageUrl.split('/').pop();
-    if (fileKey) {
-      await utapi.deleteFiles(fileKey);
-      console.log('Profile image deleted from UploadThing:', fileKey);
+    const fileName = imageUrl.split('/').pop();
+    if (fileName) {
+      const filePath = path.join('/var/www/uploads/users', fileName);
+      await fs.unlink(filePath);
+      console.log('Profile image deleted:', filePath);
     }
   } catch (error) {
-    console.error('Error deleting profile image from UploadThing:', error);
+    console.error('Error deleting profile image:', error);
   }
 }
 

@@ -11,6 +11,7 @@ import { PacketType } from '@prisma/client';
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { generateSlug } from "@/lib/slug";
+import { mkdir, writeFile } from 'fs/promises';
 
 interface Expertise {
     expertise_id: number;
@@ -69,7 +70,7 @@ export async function contactInfoRegister(formData: any) {
     if (formData.image instanceof File) {
         try {
             // Create uploads directory if it doesn't exist
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+            const uploadsDir = '/var/www/uploads/consultants';
             await fs.mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
@@ -81,7 +82,7 @@ export async function contactInfoRegister(formData: any) {
             await fs.writeFile(filePath, buffer);
 
             // Set the relative URL for database
-            imageUrl = `/uploads/${fileName}`;
+            imageUrl = `/uploads/consultants/${fileName}`;
         } catch (error) {
             console.error('Error saving image:', error);
         }
@@ -914,13 +915,18 @@ async function saveImage(base64Image: string): Promise<string> {
     try {
         const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
-        const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'users');
-        await fs.mkdir(uploadsDir, { recursive: true });
+
+        // Use absolute path for uploads
+        const uploadsDir = '/var/www/uploads/consultants';
+        await mkdir(uploadsDir, { recursive: true });
+
         const uniqueId = crypto.randomUUID();
-        const filename = `user-${uniqueId}.png`;
+        const extension = base64Image.substring(base64Image.indexOf('/') + 1, base64Image.indexOf(';'));
+        const filename = `consultant-${uniqueId}.${extension}`;
         const filepath = path.join(uploadsDir, filename);
-        await fs.writeFile(filepath, buffer);
-        return `/uploads/users/${filename}`;
+
+        await writeFile(filepath, buffer);
+        return `/uploads/consultants/${filename}`;
     } catch (error) {
         console.error('Error saving image:', error);
         throw error;

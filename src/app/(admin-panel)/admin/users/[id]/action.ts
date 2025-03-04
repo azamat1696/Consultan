@@ -51,7 +51,7 @@ const DAYS = [
 ];
 
 export async function contactInfoRegister(formData: any, id: number) {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions as any) as { user: { id: number } } | null;
     if (!session) {
         redirect('/signin');
     }
@@ -62,12 +62,11 @@ export async function contactInfoRegister(formData: any, id: number) {
     if (formData.image instanceof File) {
         try {
             // Create uploads directory if it doesn't exist
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+            const uploadsDir = '/var/www/uploads/users';
             await fs.mkdir(uploadsDir, { recursive: true });
 
             // Generate unique filename
-            // @ts-ignore
-            const fileName = `${session?.user?.id}-${Date.now()}${path.extname(formData.image.name)}`;
+            const fileName = `${session?.user?.id || 'user'}-${Date.now()}${path.extname(formData.image.name)}`;
             const filePath = path.join(uploadsDir, fileName);
 
             // Convert File to Buffer and save
@@ -75,7 +74,7 @@ export async function contactInfoRegister(formData: any, id: number) {
             await fs.writeFile(filePath, buffer);
 
             // Set the relative URL for database
-            imageUrl = `/uploads/${fileName}`;
+            imageUrl = `/uploads/users/${fileName}`;
         } catch (error) {
             console.error('Error saving image:', error);
         }
@@ -1042,7 +1041,10 @@ async function saveImage(base64Image: string): Promise<string> {
         const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
 
-        const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'users');
+        // Use absolute path for uploads
+        const uploadsDir = '/var/www/uploads/users';
+        
+        // Create directory if it doesn't exist
         await fs.mkdir(uploadsDir, { recursive: true });
 
         const uniqueId = crypto.randomUUID();
@@ -1082,11 +1084,13 @@ export async function uploadFile(formData: FormData) {
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
-        // Save to public directory
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+        // Save to /var/www/uploads directory
+        const uploadDir = '/var/www/uploads'
         const filename = `${Date.now()}-${file.name}`
         const filepath = path.join(uploadDir, filename)
 
+        // Create directory if it doesn't exist
+        await fs.mkdir(uploadDir, { recursive: true });
         await writeFile(filepath, buffer)
         return { success: true, filepath: `/uploads/${filename}` }
 
