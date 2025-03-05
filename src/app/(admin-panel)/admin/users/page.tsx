@@ -27,8 +27,6 @@ import { generateSlug } from "@/lib/slug";
 import { PaginationMeta } from "@/types/index";
 import { SearchIcon, PlusIcon, EditIcon, DeleteIcon, KeyIcon, UserIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
-import { UploadButton } from "@uploadthing/react";
-import { OurFileRouter } from "@/app/api/uploadthing/core";
 import Image from "next/image";
 
 const roleTranslations = {

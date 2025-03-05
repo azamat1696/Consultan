@@ -10,7 +10,6 @@ import AdminFooter from "@/components/admin/Footer";
 import { Metadata } from "next";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
-import { ourFileRouter } from "@/app/api/uploadthing/core";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -38,9 +37,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 min-h-screen flex flex-col`}
         cz-shortcut-listen="true"
       >
-        <NextSSRPlugin
-          routerConfig={extractRouterConfig(ourFileRouter)}
-        />
         <Provider>
            <AdminHeader/>
            <main className="container mx-auto max-w-7xl pt-4 px-6 flex-grow  ">
