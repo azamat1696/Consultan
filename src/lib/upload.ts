@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 const UPLOAD_DIR = process.env.NODE_ENV === 'development'
   ? path.join(process.cwd(), 'public', 'uploads') // Save to public/uploads in development
-  : path.join('/var', 'www', 'uploads');
+  : '/var/www/uploads';
   console.log('>>>>>>>',process.env.NODE_ENV,process.cwd() );
 
 export async function uploadImage(base64Image: string, type: string): Promise<string> {
