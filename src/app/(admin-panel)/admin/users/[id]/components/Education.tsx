@@ -4,7 +4,7 @@ import { Button, Form, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader,
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useForm } from 'react-hook-form';
-import { getEducations, updateEducation, createEducation, deleteEducation } from '../action';
+import { getEducations, updateEducation, createEducation, deleteEducation } from '../actions';
 import toast from "react-hot-toast";
 import { Controller } from 'react-hook-form';
 import { Select, SelectItem } from '@heroui/react';

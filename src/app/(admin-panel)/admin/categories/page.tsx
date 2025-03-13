@@ -125,7 +125,7 @@ export default function CategoriesPage() {
     const filtered = categories.filter((category) =>
       category.title.toLowerCase().includes(value.toLowerCase()) ||
       category.page_path?.toLowerCase().includes(value.toLowerCase()) ||
-      category.menu.title.toLowerCase().includes(value.toLowerCase())
+      category?.menu?.title?.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredCategories(filtered);
   }, [categories]);
@@ -179,7 +179,7 @@ export default function CategoriesPage() {
     setFormData({
       title: category.title,
       page_path: category.page_path || "",
-      menuId: Number(category.menu.id),
+      menuId: Number(category?.menu?.id),
       image: category.image || "",
       slug: category.slug || "",
     });
@@ -270,7 +270,7 @@ export default function CategoriesPage() {
           <TableColumn>İşlemler</TableColumn>
         </TableHeader>
         <TableBody>
-          {filteredCategories.map((category) => (
+          {filteredCategories?.map((category) => (
             <TableRow key={category.id}>
               <TableCell>{category.title}</TableCell>
               <TableCell>
@@ -290,7 +290,7 @@ export default function CategoriesPage() {
               <TableCell>{category.page_path || "-"}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {category.menu.title}
+                  {category?.menu?.title}
                 </div>
               </TableCell>
               <TableCell>
@@ -357,7 +357,7 @@ export default function CategoriesPage() {
                   ))}
                 </Select>
 
-                <Select
+             { /*   <Select
                   label="Çalışma Alanları"
                   selectionMode="multiple"
                   placeholder="Çalışma alanlarını seçin"
@@ -371,7 +371,7 @@ export default function CategoriesPage() {
                   ))}
                 </Select>
               </div>
-
+              */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500 mb-2">Seçili Uzmanlık Alanları</p>
@@ -394,7 +394,7 @@ export default function CategoriesPage() {
                     ))}
                   </div>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-sm text-gray-500 mb-2">Seçili Çalışma Alanları</p>
                   <div 
                     className="flex flex-wrap gap-2 min-h-[40px] p-2 border rounded-lg"
@@ -414,8 +414,13 @@ export default function CategoriesPage() {
                       </Chip>
                     ))}
                   </div>
+                 
+                  </div>
+                   */}
                 </div>
+                
               </div>
+              
 
               <div>
                 <label className="block text-sm mb-2">Görsel</label>
@@ -447,12 +452,12 @@ export default function CategoriesPage() {
               <Select
                 label="Menü"
                 selectionMode="single"
-                selectedKeys={[formData.menuId.toString()]}
+                selectedKeys={[formData?.menuId?.toString()]}
                 onChange={(e) => setFormData({ ...formData, menuId: Number(e.target.value) })}
                 required
               >
                 {[
-                  <SelectItem key="0" value="0">Menü Seçin</SelectItem>,
+                  <SelectItem key="" value="">Menü Seçin</SelectItem>,
                   ...menus.map((menu) => (
                     <SelectItem key={menu.id.toString()} value={menu.id.toString()}>
                       {menu.title}

@@ -374,7 +374,7 @@ export default function UsersTable() {
                     <div className="flex-1">
                       <div className="flex items-center gap-4 relative">
                         <Image
-                          src={formData.profile_image || ""} 
+                          src={formData.profile_image || "default-profile.png"} 
                           alt="Profile"
                           fill
                           className="w-24 h-24 rounded-full object-cover bg-gray-100"

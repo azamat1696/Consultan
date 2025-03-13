@@ -3,14 +3,12 @@ import prisma from "@/lib/db";
 import {redirect} from "next/navigation";
 import { getServerSession } from "next-auth";
 import {authOptions} from "@/lib/auth";
-import fs from 'fs/promises';
-import path from 'path';
 import { PacketType } from '@prisma/client';
 import { createLog } from "@/lib/logger";
 import crypto from "crypto";
 import { hashPassword } from "@/lib/password";
-import { writeFile } from 'fs/promises'
 import { Session } from 'next-auth'
+import { uploadImage, deleteImage } from "@/lib/upload";
 
 interface Expertise {
     expertise_id: number;
@@ -55,29 +53,19 @@ export async function contactInfoRegister(formData: any, id: number) {
     if (!session) {
         redirect('/signin');
     }
-
+    const currentUser = await prisma.user.findUnique({
+        where: { id },
+        select: { profile_image: true }
+    });
+    console.log('formData',formData);
     let imageUrl = undefined;
-    
+    if (formData.image instanceof File) {
+        await deleteImage(currentUser?.profile_image || null, 'users');
+    }
+    console.log('currentUser?.profile_image',currentUser?.profile_image);
     // Handle image upload
     if (formData.image instanceof File) {
-        try {
-            // Create uploads directory if it doesn't exist
-            const uploadsDir = process.env.UPLOADFILE_PATH + '/users';
-            await fs.mkdir(uploadsDir, { recursive: true });
-
-            // Generate unique filename
-            const fileName = `${session?.user?.id || 'user'}-${Date.now()}${path.extname(formData.image.name)}`;
-            const filePath = path.join(uploadsDir, fileName);
-
-            // Convert File to Buffer and save
-            const buffer = Buffer.from(await formData.image.arrayBuffer());
-            await fs.writeFile(filePath, buffer);
-
-            // Set the relative URL for database
-            imageUrl = `/uploads/users/${fileName}`;
-        } catch (error) {
-            console.error('Error saving image:', error);
-        }
+         imageUrl = await uploadImage(formData.image as any, 'users');
     }
 
     // Hash password if it's being updated
@@ -98,7 +86,8 @@ export async function contactInfoRegister(formData: any, id: number) {
             password: hashedPassword,
             title: formData.title,
             phone: formData.phone,
-            profile_image: imageUrl || formData.image || undefined
+            slug: formData.slug,
+            profile_image: imageUrl || formData.profile_image || undefined
         }
     });
 
@@ -950,19 +939,30 @@ export async function getPackets(id: number) {
 }
 
 export async function updateDescription(description: string, id: number) {
-    const session = await getServerSession(authOptions as any);
-    if (!session) {
-        redirect('/signin');
-    }
-
     try {
+        const session = await getServerSession(authOptions as any);
+        if (!session) {
+            redirect('/signin');
+        }
+
         const user = await prisma.user.update({
-            where: { id: id },
-            data: { description }
+            where: {
+                id: id
+            },
+            data: {
+                description: description
+            }
         });
-        console.log(user);
+
+        await createLog({
+            type: "UPDATE",
+            action: "UPDATE_USER_DESCRIPTION",
+            description: `Updated description for user ${id}`
+        });
+
+        return user;
     } catch (error) {
-        console.error('Error updating description:', error);
+        console.log('Error updating description:', JSON.stringify(error));
         throw error;
     }
 }
@@ -1034,34 +1034,10 @@ export async function getBillingInfo(id: number) {
     }
 }
 
-async function saveImage(base64Image: string): Promise<string> {
+
+export async function uploadImages(imageData: string) {
     try {
-        // Get file extension from mime type
-        const fileExtension = base64Image.startsWith('data:image/png') ? 'png' : 'jpg';
-        const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-        const buffer = Buffer.from(base64Data, 'base64');
-
-        // Use absolute path for uploads
-        const uploadsDir = process.env.UPLOADFILE_PATH + '/users';
-        
-        // Create directory if it doesn't exist
-        await fs.mkdir(uploadsDir, { recursive: true });
-
-        const uniqueId = crypto.randomUUID();
-        const filename = `user-${uniqueId}.${fileExtension}`;
-        const filepath = path.join(uploadsDir, filename);
-
-        await fs.writeFile(filepath, buffer);
-        return `/uploads/users/${filename}`;
-    } catch (error) {
-        console.error('Error saving image:', error);
-        throw error;
-    }
-}
-
-export async function uploadImage(imageData: string) {
-    try {
-        const imageUrl = await saveImage(imageData);
+        const imageUrl = await uploadImage(imageData,'users');
         return { success: true, url: imageUrl };
     } catch (error) {
         console.error('Error uploading image:', error);
@@ -1069,33 +1045,3 @@ export async function uploadImage(imageData: string) {
     }
 }
 
-export async function uploadFile(formData: FormData) {
-    try {
-        const session = await getServerSession(authOptions) as Session | null
-        if (session?.user?.role !== 'admin') {
-            throw new Error('Unauthorized')
-        }
-
-        const file = formData.get('file') as File
-        if (!file) {
-            throw new Error('No file uploaded')
-        }
-
-        const bytes = await file.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-
-        // Save to /var/www/uploads directory
-        const uploadDir = process.env.UPLOADFILE_PATH || '/var/www/uploads'
-        const filename = `${Date.now()}-${file.name}`
-        const filepath = path.join(uploadDir, filename)
-
-        // Create directory if it doesn't exist
-        await fs.mkdir(uploadDir, { recursive: true });
-        await writeFile(filepath, buffer)
-        return { success: true, filepath: `/uploads/${filename}` }
-
-    } catch (error) {
-        console.error('Error uploading file:', error)
-        return { success: false, error: 'Failed to upload file' }
-    }
-}

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Input, Button } from "@heroui/react";
 import toast from "react-hot-toast";
-import { getBillingInfo, saveBillingInfo } from '../action';
+import { getBillingInfo, saveBillingInfo } from '../actions';
 import { useParams } from 'next/navigation';
 
 interface BillingInfoType {

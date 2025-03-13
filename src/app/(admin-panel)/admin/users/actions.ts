@@ -1,7 +1,5 @@
 "use server"
 import prisma from "@/lib/db";
-import fs from 'fs/promises';
-import path from 'path';
 import crypto from 'crypto';
 import { createLog } from "@/lib/logger";
 import { sendPasswordResetEmail } from "@/lib/mail";
@@ -9,6 +7,7 @@ import { revalidateTag } from "next/cache";
 import { hashPassword } from "@/lib/password";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { uploadImage,deleteImage } from "@/lib/upload";
 
 interface GetUsersParams {
   search?: string;
@@ -37,13 +36,6 @@ interface SessionUser {
   }
 }
 
-// Add this utility function at the top of the file
-function getUploadPath(folder: string): string {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const basePath = isProduction ? '/var/www/uploads' : path.join(process.cwd(), 'public');
-  return path.join(basePath, folder);
-}
-
 export async function getUsers(params: GetUsersParams = { search: "", role: null, skip: 0, take: 10 }) {
   try {
     const where = {
@@ -68,48 +60,7 @@ export async function getUsers(params: GetUsersParams = { search: "", role: null
     throw error;
   }
 }
-
-async function saveImage(fileOrBase64: File | string, prefix: string = 'user') {
-  try {
-    const uploadsDir = getUploadPath('uploads/users');
-    await fs.mkdir(uploadsDir, { recursive: true });
-
-    let buffer: Buffer;
-    let extension: string;
-
-    if (fileOrBase64 instanceof File) {
-      // Handle File object
-      buffer = Buffer.from(await fileOrBase64.arrayBuffer());
-      extension = path.extname(fileOrBase64.name);
-    } else {
-      // Handle base64 string
-      if (!fileOrBase64.startsWith('data:image')) {
-        return fileOrBase64; // Return as is if not a base64 image
-      }
-
-      // Extract extension from base64 string
-      const match = fileOrBase64.match(/^data:image\/(\w+);base64,/);
-      if (!match) {
-        throw new Error('Invalid base64 image format');
-      }
-      extension = match[1];
-
-      // Convert base64 to buffer
-      const base64Data = fileOrBase64.replace(/^data:image\/\w+;base64,/, '');
-      buffer = Buffer.from(base64Data, 'base64');
-    }
-
-    const uniqueId = crypto.randomUUID();
-    const fileName = `${prefix}-${uniqueId}.${extension}`;
-    const filePath = path.join(uploadsDir, fileName);
-
-    await fs.writeFile(filePath, buffer);
-    return `/uploads/users/${fileName}`;
-  } catch (error) {
-    console.error('Error saving image:', error);
-    throw error;
-  }
-}
+ 
 
 export async function addUser(data: CreateUserData) {
   try {
@@ -119,7 +70,7 @@ export async function addUser(data: CreateUserData) {
 
     let imageUrl = null;
     if (data.profile_image instanceof File) {
-      imageUrl = await saveImage(data.profile_image);
+      imageUrl = await uploadImage(data.profile_image as any, 'users');
     }
 
     // Generate and hash a random password
@@ -152,7 +103,7 @@ export async function addUser(data: CreateUserData) {
 
     return user;
   } catch (error) {
-    console.error('Error adding user:', error);
+    console.error('Error adding user:', JSON.stringify(error));
     await createLog({
       type: "ERROR",
       action: "Kullanıcı Ekleme Hatası",
@@ -162,20 +113,7 @@ export async function addUser(data: CreateUserData) {
   }
 }
 
-async function deleteProfileImage(imageUrl: string | null) {
-  if (!imageUrl) return;
-  
-  try {
-    const fileName = imageUrl.split('/').pop();
-    if (fileName) {
-      const filePath = path.join(getUploadPath('uploads/users'), fileName);
-      await fs.unlink(filePath);
-      console.log('Profile image deleted:', filePath);
-    }
-  } catch (error) {
-    console.error('Error deleting profile image:', error);
-  }
-}
+
 
 export async function updateUser(id: number, data: Partial<CreateUserData>) {
   try {
@@ -189,8 +127,8 @@ export async function updateUser(id: number, data: Partial<CreateUserData>) {
 
     // update profile image
     if (data.profile_image && data.profile_image !== existingUser.profile_image) {
-      await deleteProfileImage(existingUser.profile_image);
-      data.profile_image = await saveImage(data.profile_image);
+      await deleteImage(existingUser.profile_image, 'users');
+      data.profile_image = await uploadImage(data.profile_image as any, 'users');
     } else {
       // If no new image, keep the existing one
       data.profile_image = existingUser.profile_image;
@@ -198,7 +136,16 @@ export async function updateUser(id: number, data: Partial<CreateUserData>) {
 
     const user = await prisma.user.update({
       where: { id },
-      data
+      data: {
+        name: data.name,
+        surname: data.surname,
+        email: data.email,
+        role: data.role,
+        status: data.status,
+        profile_image: data.profile_image,
+        gender: data.gender,
+        phone: data.phone,
+      }
     });
 
     await createLog({
@@ -209,7 +156,7 @@ export async function updateUser(id: number, data: Partial<CreateUserData>) {
 
     return user;
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error('Error updating user:', JSON.stringify(error));
     await createLog({
       type: "ERROR",
       action: "Kullanıcı Güncelleme Hatası",
@@ -230,7 +177,7 @@ export async function deleteUser(id: number) {
     }
 
     // Profil resmini sil
-    await deleteProfileImage(user.profile_image);
+    await deleteImage(user.profile_image, 'users');
 
     // Kullanıcıyı sil
     await prisma.user.delete({

@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react';
 import toast from "react-hot-toast";
-import {deleteConsultantExpertise, getConsultantExpertises, createConsultantExpertise, updateConsultantExpertise, getExpertises, getWorkspaces} from "../action";
+import {deleteConsultantExpertise, getConsultantExpertises, createConsultantExpertise, updateConsultantExpertise, getExpertises, getWorkspaces} from "../actions";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button, Textarea } from "@heroui/react";
 import remarkGfm from 'remark-gfm';
 import toast from "react-hot-toast";
-import { getContactInfo, updateDescription, uploadImage } from '../action';
+import { getContactInfo, updateDescription, uploadImages } from '../actions';
 import { useParams } from 'next/navigation';
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
@@ -63,7 +63,7 @@ export default function AboutYou() {
             });
             
             // Upload image
-            const result = await uploadImage(base64 as string);
+            const result = await uploadImages(base64 as string);
             if (result.success) {
                 yield result.url;
                 return true;

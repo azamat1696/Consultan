@@ -5,22 +5,33 @@ import crypto from 'crypto';
 const UPLOAD_DIR = process.env.NODE_ENV === 'development'
   ? path.join(process.cwd(), 'public', 'uploads') // Save to public/uploads in development
   : '/var/www/uploads';
-  console.log('>>>>>>>',process.env.NODE_ENV,process.cwd() );
+  console.log('>>>>>>>',UPLOAD_DIR );
 
-export async function uploadImage(base64Image: string, type: string): Promise<string> {
-  try {
+export async function uploadImage(base64Image: string | File, type: string): Promise<string> {
+   try {
     // If it's already a URL, return it
-    if (!base64Image.startsWith('data:image')) {
+    if (typeof base64Image === 'string' && !base64Image.startsWith('data:image')) {
       return base64Image;
     }
 
-    // Convert base64 to buffer
-    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
+    let buffer: Buffer;
+    let extension = 'png';
+
+    if (base64Image instanceof File) {
+      // Handle File object
+      const arrayBuffer = await base64Image.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      extension = base64Image.name.split('.').pop() || 'png';
+    } else {
+      // Handle base64 string
+      const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+      buffer = Buffer.from(base64Data, 'base64');
+      extension = base64Image.split(';')[0].split('/')[1];
+    }
 
     // Create unique filename with type prefix
     const uniqueId = crypto.randomUUID();
-    const filename = `${type}-${uniqueId}.png`;
+    const filename = `${type}-${uniqueId}.${extension}`;
     const typeDir = path.join(UPLOAD_DIR, type);
     const filepath = path.join(typeDir, filename);
 
@@ -38,29 +49,29 @@ export async function uploadImage(base64Image: string, type: string): Promise<st
   }
 }
 
-export async function deleteImage(imageUrl: string | null, type: string) {
-  if (!imageUrl) return;
-  
-  try {
-    // Handle both local and external URLs
-    if (imageUrl.startsWith('http')) {
-      return; // Skip deletion for external URLs
-    }
+export async function deleteImage(imageUrl: string | null, type: string): Promise<void> {
+    if (!imageUrl) return;
 
-    // Extract filename from URL
-    const fileName = imageUrl.split('/').pop();
-    if (!fileName) return;
-
-    const filePath = path.join(UPLOAD_DIR, type, fileName);
-    
     try {
-      await fs.access(filePath);
-      await fs.unlink(filePath);
+        // Extract filename from URL
+        const fileName = path.basename(imageUrl);
+        
+        // Construct the full file path based on environment
+        const filePath = path.join(UPLOAD_DIR, type, fileName);
+
+        // Check if file exists before attempting to delete
+        try {
+            await fs.access(filePath);
+        } catch (error) {
+            console.log(`File ${filePath} does not exist or cannot be accessed`);
+            return;
+        }
+
+        // Delete the file
+        await fs.unlink(filePath);
+        console.log(`Successfully deleted file: ${filePath}`);
     } catch (error) {
-      // File doesn't exist or can't be accessed, which is fine
-      console.log('File not found or already deleted:', filePath);
+        console.error('Error deleting image:', error);
+        // Don't throw error to prevent blocking the update process
     }
-  } catch (error) {
-    console.error('Error deleting image:', error);
-  }
 } 

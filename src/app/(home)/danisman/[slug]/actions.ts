@@ -26,7 +26,13 @@ export async function getConsultant(slug: string) {
                 deletedAt: null,
                 role: 'consultant'
             },
-            include: {
+            select: {
+                id: true,
+                name: true,
+                surname: true,
+                profile_image: true,
+                slug: true,
+                title: true,
                 packets: {
                     where: {
                         status: true,

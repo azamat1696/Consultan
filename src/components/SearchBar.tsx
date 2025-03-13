@@ -1,50 +1,47 @@
 "use client"
+import Link from "next/link";
 import { useState } from "react";
 
-const mockData = [
-    {
-        id: 1,
-        image: "/img1.jpg",
-        title: "Uzman Psikolojik Danışman (Çocuk, Ergen ve Yetişkinlere Yönelik Psikolojik Danışma Hizmeti)",
-        name: "Murat Abak",
-        oldPrice: "1750 ₺",
-        newPrice: "1500 ₺",
-    },
-    {
-        id: 2,
-        image: "/img2.jpg",
-        title: "Uzman Psikolojik Danışman (Çocuk-Ergen-Yetişkin Psikolojik Danışmanlığı)",
-        name: "Sedat Kaval",
-        oldPrice: "2500 ₺",
-        newPrice: "1750 ₺",
-    },
-    {
-        id: 3,
-        image: "/img3.jpg",
-        title: "Uzman Psikolog ve Terapist",
-        name: "Volkan Hoşkan",
-        oldPrice: "3500 ₺",
-        newPrice: "2500 ₺",
-    },
-];
+interface Consultant {
+    id: number;
+    profile_image: string;
+    title: string;
+    name: string;
+    surname: string;
+    oldPrice: string;
+    newPrice: string;
+    slug: string;
+}
 
 export default function SearchBar() {
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState(mockData);
+    const [results, setResults] = useState<Consultant[]>([]);
 
-    const handleSearch = (e:any) => {
+    const handleSearch = async (e: any) => {
         const searchQuery = e.target.value;
         setQuery(searchQuery);
         if (searchQuery) {
-            setResults(
-                mockData.filter((item) =>
-                    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-            );
+            try {
+                const response = await fetch(`/api/consultants?query=${encodeURIComponent(searchQuery)}`);
+                if (response.ok) {
+                    const data: Consultant[] = await response.json();
+                    setResults(data);
+                } else {
+                    console.error('Error fetching consultants:', response.statusText);
+                    setResults([]);
+                }
+            } catch (error) {
+                console.error('Error fetching consultants:', error);
+                setResults([]);
+            }
         } else {
             setResults([]);
         }
     };
+
+    // Limit displayed results to 3
+    const displayedResults = results.slice(0, 3);
+    const totalResults = results.length;
 
     return (
         <div className="relative w-full justify-center">
@@ -52,7 +49,7 @@ export default function SearchBar() {
             <div className="flex items-center rounded-md px-4 py-2 bg-[#f1f3f5]">
                 <input
                     type="text"
-                    placeholder="Danışmanlık Uzmanlık... Ara"
+                    placeholder="Arama yapın..."
                     className="flex-1 outline-none text-gray-700 bg-[#f1f3f5]"
                     value={query}
                     onChange={handleSearch}
@@ -76,21 +73,23 @@ export default function SearchBar() {
                 <div className="absolute z-50 w-full bg-white border rounded-md shadow mt-2">
                     {results.length > 0 ? (
                         <>
-                            {results.map((result) => (
-                                <div
-                                    key={result.id}
+                            {displayedResults.map((result,index) => (
+                                <Link
+                                    key={index}
+                                    href={`/danisman/${result.slug}`}
                                     className="flex items-center p-4 border-b hover:bg-gray-50"
+                                    onClick={() => setQuery('')}
                                 >
                                     <img
-                                        src={result.image}
-                                        alt={result.name}
+                                        src={result.profile_image}
+                                        alt={result.name + " " + result.surname}
                                         className="w-12 h-12 rounded-full object-cover"
                                     />
                                     <div className="ml-4 flex-1">
                                         <h3 className="text-sm font-semibold text-gray-800">
                                             {result.title}
                                         </h3>
-                                        <p className="text-xs text-gray-500">{result.name}</p>
+                                        <p className="text-xs text-gray-500">{result.name + " " + result.surname}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm text-gray-400 line-through">
@@ -100,13 +99,15 @@ export default function SearchBar() {
                                             {result.newPrice}
                                         </p>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
-                            <div className="text-center p-3">
-                                <button className="text-[#35303E] hover:underline">
-                                    Tüm Sonuçları Gör (982)
-                                </button>
-                            </div>
+                            {totalResults > 3 && (
+                                <div className="text-center p-3">
+                                    <Link href={`/arama/${encodeURIComponent(query)}`} className="text-[#35303E] hover:underline" onClick={() => setQuery('')}>
+                                        Tüm Sonuçları Gör ({totalResults})
+                                    </Link>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <div className="text-center p-4 text-gray-500">Sonuç bulunamadı.</div>

@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {contactInfoRegister, getContactInfo} from "../action";
+import {contactInfoRegister, getContactInfo} from "../actions";
 import { Input,Button, Select, SelectItem } from "@heroui/react";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
@@ -17,6 +17,7 @@ interface User {
     phone: string;
     profile_image?: string;
     role?: string;
+    slug?: string;
 }
 // Validation Schema
 const formSchema = z.object({
@@ -30,7 +31,8 @@ const formSchema = z.object({
     phone: z.string().regex(/^90\d{10}$/, {
         message: "Telefon numarası formatı geçersiz (905XXXXXXXXX)",
     }),
-    image: z.any().optional()
+    image: z.any().optional(),
+    slug: z.string().min(2, { message: "Slug en az 2 karakter olmalıdır" }).optional()
 });
 const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E";
 
@@ -49,7 +51,8 @@ export default function ContactInfo() {
             gender: '',
             title: '',
             phone: '',
-            image: undefined
+            image: undefined,
+            slug: ''
         }
     });
     const { id } = useParams();
@@ -74,7 +77,9 @@ export default function ContactInfo() {
                     surname: res.surname || '',
                     gender: res.gender || '',
                     title: res.title || '',
-                    phone: res.phone || ''
+                    phone: res.phone || '',
+                    slug: res.slug || '',
+                    image: res.profile_image || undefined
                 });
             }
         });

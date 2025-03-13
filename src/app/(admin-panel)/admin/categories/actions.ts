@@ -6,7 +6,7 @@ import path from "path";
 import { mkdir, writeFile } from 'fs/promises';
 import crypto from "crypto";
 import { generateSlug } from "@/lib/slug";
-
+import { uploadImage, deleteImage } from "@/lib/upload";
 export async function getCategories() {
   try {
     const categories = await prisma.category.findMany({
@@ -28,7 +28,7 @@ export async function getCategories() {
     throw error;
   }
 }
-
+/*
 async function saveImage(base64Image: string): Promise<string> {
   try {
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
@@ -50,10 +50,11 @@ async function saveImage(base64Image: string): Promise<string> {
     throw error;
   }
 }
+*/
 
 interface CategoryData {
   title: string;
-  menuId: number;
+  menuId?: number | null;
   page_path?: string | null;
   slug: string;
   image?: string | null;
@@ -74,20 +75,34 @@ async function checkSlugExists(slug: string, currentId?: number): Promise<boolea
 
 export async function addCategory(data: CategoryData) {
   try {
+    // Check if slug exists
     if (await checkSlugExists(data.slug)) {
       throw new Error("Bu URL (slug) zaten kullanımda. Lütfen başka bir başlık veya slug kullanın.");
     }
-    let imageUrl = '';
-    if (data.image) {
-      imageUrl = await saveImage(data.image);
+
+    // Check if menu exists if menuId is provided
+    if (data.menuId) {
+      const menu = await prisma.menu.findUnique({
+        where: { id: data.menuId }
+      });
+
+      if (!menu) {
+        throw new Error(`Menü bulunamadı (ID: ${data.menuId}). Lütfen geçerli bir menü seçin.`);
+      }
     }
 
+    // Handle image upload
+    let imageUrl = '';
+    if (data.image) {
+      imageUrl = await uploadImage(data.image, 'category');
+    }
+    
     const category = await prisma.category.create({
       data: {
         title: data.title,
         page_path: data.page_path,
-        menuId: data.menuId,
-        image: imageUrl,
+        menuId: data.menuId || null,
+        image: imageUrl || null,
         slug: data.slug,
         expertiseLinks: {
           create: data.expertiseIds?.map(expertiseId => ({
@@ -99,22 +114,32 @@ export async function addCategory(data: CategoryData) {
             workspace: { connect: { workspace_id: workspaceId } }
           })) || []
         }
+      },
+      include: {
+        menu: true,
+        expertiseLinks: true,
+        categoryLinks: true
       }
     });
+
     await createLog({
       type: "CREATE",
       action: "Kategori Ekleme",
       description: `ID: ${category.id} kategori eklendi.`
     });
+
     return category;
-  } catch (error) {
-    console.error('Error adding category:', error);
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Bilinmeyen bir hata oluştu';
+    console.error('Error adding category:', { error: errorMessage });
+    
     await createLog({
       type: "ERROR",
       action: "Kategori Ekleme Hatası",
-      description: error instanceof Error ? error.message : "Bilinmeyen hata"
+      description: errorMessage
     });
-    throw error;
+    
+    throw new Error(errorMessage);
   }
 }
 
@@ -123,9 +148,32 @@ export async function updateCategory(id: number, data: CategoryData) {
     if (await checkSlugExists(data.slug, id)) {
       throw new Error("Bu URL (slug) zaten kullanımda. Lütfen başka bir başlık veya slug kullanın.");
     }
+
+    // Check if menu exists if menuId is provided
+    if (data.menuId) {
+      const menu = await prisma.menu.findUnique({
+        where: { id: data.menuId }
+      });
+
+      if (!menu) {
+        throw new Error(`Menü bulunamadı (ID: ${data.menuId}). Lütfen geçerli bir menü seçin.`);
+      }
+    }
+
+    // Get current category to check for existing image
+    const currentCategory = await prisma.category.findUnique({
+      where: { id },
+      select: { image: true }
+    });
+
     let imageUrl = data.image;
+    // If there's a new image upload or image is being removed
+    if (currentCategory?.image && (data.image !== currentCategory.image || !data.image)) {
+      await deleteImage(currentCategory.image, 'category');
+    }
+
     if (data.image && data.image.startsWith('data:image')) {
-      imageUrl = await saveImage(data.image);
+      imageUrl = await uploadImage(data.image, 'category');
     }
 
     // Ensure all IDs are numbers
@@ -156,7 +204,7 @@ export async function updateCategory(id: number, data: CategoryData) {
       data: {
         title: data.title,
         page_path: data.page_path,
-        menuId: data.menuId,
+        menuId: data.menuId || null,
         image: imageUrl,
         slug: data.slug,
         expertiseLinks: expertiseIds && expertiseIds.length > 0 ? {
@@ -194,7 +242,7 @@ export async function updateCategory(id: number, data: CategoryData) {
     });
     return category;
   } catch (error) {
-    console.error('Error updating category:', error);
+    console.error('Error updating category:', JSON.stringify(error));
     await createLog({
       type: "ERROR",
       action: "Kategori Güncelleme Hatası",

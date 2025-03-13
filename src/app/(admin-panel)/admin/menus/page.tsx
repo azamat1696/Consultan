@@ -86,7 +86,6 @@ export default function MenusPage() {
     });
     setEditingId(null);
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -100,6 +99,14 @@ export default function MenusPage() {
       onClose();
       fetchMenus();
       resetForm();
+      setFormData({
+        title: "",
+        type: "",
+        page_path: "",
+        order_number: 0,
+        parentId: null,
+        categoryId: null,
+      });
     } catch (error) {
       toast.error("Bir hata oluştu");
     }
@@ -279,7 +286,7 @@ export default function MenusPage() {
                   </SelectItem>
                 ))}
               </Select>
-              {formData.type === "Relation" && (
+              {/* formData.type === "Relation" && (
                 <Select
                   label="Kategori"
                   selectionMode="single"
@@ -301,9 +308,14 @@ export default function MenusPage() {
                     </SelectItem>
                   )}
                 </Select>
-              )}
+              ) */}
               <div className="flex justify-end gap-2">
-                <Button variant="flat" color="danger" onPress={onClose}>
+                <Button variant="flat" color="danger" onPress={
+                  () => {
+                    onClose();
+                    resetForm();
+                  }
+                }>
                   İptal
                 </Button>
                 <Button color="primary" type="submit">

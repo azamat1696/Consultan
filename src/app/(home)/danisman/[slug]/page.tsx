@@ -118,7 +118,6 @@ export default function ConsultantProfilePage() {
             fetchConsultant()
         }
     }, [params.slug])
-    console.log(consultant)
     if (loading) {
         return <div className="flex justify-center items-center min-h-screen">Loading...</div>
     }
@@ -127,29 +126,6 @@ export default function ConsultantProfilePage() {
         return <div className="flex justify-center items-center min-h-screen">Danışman bulunamadı</div>
     }
 
-    const reviews = [
-        {
-            id: 1,
-            author: "Ayşe Eser",
-            date: "16 Aralık 2024",
-            rating: 5,
-            comment: "Bu gün Volkan beyle ilk seansımızı yaptık. Ön görüşmede de kendisinin dalında uzman, mesleğini severek yaptığını gözlemledim. Güler yüzü, nazik davranışları, dinleme ve konuşma tavırları bende sonsuz bir güven teşkil etti. Volkan beyle olumlu ve başarılı sonuçlar elde edeceğime inanıyorum."
-        },
-        {
-            id: 2,
-            author: "Eren Yıldız",
-            date: "14 Kasım 2024",
-            rating: 5,
-            comment: "Volkan Beyle 2. seansımızı bitirdik. Enerji akışı çok güzel. İnsan kendisini rahatlıkla ifade edebiliyor. Çok memnunum."
-        },
-        {
-            id: 3,
-            author: "İrem Çınar",
-            date: "12 Ekim 2024",
-            rating: 5,
-            comment: "Volkan beyle ilk seansımızı gerçekleştirdik. Kendisinden pozitif bir enerji aldım ve çok güvenli ve rahat bir ortam yarattı."
-        }
-    ]
     const getUniqueWorkspaces = (workspaces: any) => {
         const seen = new Set();
         return workspaces.flat().filter((workspace: any) => {
@@ -175,6 +151,7 @@ export default function ConsultantProfilePage() {
                         <div className="text-center">
                             <h1 className="text-lg font-semibold mb-1">{consultant.name} {consultant.surname}</h1>
                             <p className="text-sm text-gray-600 mb-2">{consultant.title}</p>
+
                         </div>
                     </div>
                 </div>

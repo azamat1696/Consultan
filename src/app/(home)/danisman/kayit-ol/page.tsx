@@ -48,7 +48,9 @@ export default function ConsultantRegistrationSection() {
                 className="min-h-[600px] flex items-center justify-center bg-[url('/images/consultant-bg.jpg')] bg-cover bg-center bg-no-repeat">
                 <div className="w-full max-w-md mx-auto p-6">
                     <div className="text-center mb-8">
-                        <h1 className="text-red-500 text-2xl font-bold mb-2">Advicemy.com</h1>
+                        <h1 className="text-[#35303E] text-2xl font-bold mb-2">Danışman Ol</h1>
+                      {/*
+                      
                         <p className="text-gray-800 font-medium mb-2">
                             33 ayrı kategoride online danışmanlık hizmetini
                             veren Türkiye'nin en büyük danışmanlık platformudur.
@@ -56,6 +58,8 @@ export default function ConsultantRegistrationSection() {
                         <p className="text-gray-800 font-medium">
                             Siz de istediğiniz kategoride danışman profilinizi oluşturabilirsiniz.
                         </p>
+                      
+                      */}
                     </div>
 
                     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -130,7 +134,7 @@ export default function ConsultantRegistrationSection() {
 
                             <Button
                                 type="submit"
-                                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md"
+                                className="w-full bg-[#35303E] hover:bg-[#6b607e] text-white py-2 rounded-md"
                             >
                                 Danışman ol
                             </Button>
@@ -138,7 +142,7 @@ export default function ConsultantRegistrationSection() {
                     </div>
                 </div>
             </section>
-            <HowItWorksSection />
+           {/* <HowItWorksSection /> */}
         </>
     )
 }

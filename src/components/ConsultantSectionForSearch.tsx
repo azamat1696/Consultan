@@ -43,8 +43,8 @@ const ConsultantCard = ({
     };
     return (
         <div className="bg-white rounded-lg shadow-sm border p-4">
-            <div className="flex gap-4">
-                <div className="relative">
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative mx-auto md:mx-0">
                     <Image
                         src={image || '/assets/images/default-avatar.png'}
                         alt={`${name} ${surname}`}
@@ -56,9 +56,9 @@ const ConsultantCard = ({
                         <span className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full" />
                     )}
                 </div>
-                <div className="flex justify-between w-full items-center">
-                 <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-start">
+                <div className="flex flex-col md:flex-row justify-between w-full items-start md:items-center">
+                    <div className="flex flex-col gap-2 w-full">
+                        <div className="flex justify-between items-start">
                             <div>
                                 <h3 className="font-semibold text-lg">{name} {surname}</h3>
                                 <p className="text-sm text-gray-600">{title}</p>
@@ -110,7 +110,7 @@ const ConsultantCard = ({
                                             )}
                         </div>
 
-                        <div className='w-full flex justify-around items-center gap-2 mb-2 mt-4'>
+                        <div className='w-full flex flex-col sm:flex-row justify-around items-center gap-2 mb-2 mt-4'>
                             {/* Free Consultation Badge */}
                             {packets?.find((packet: any) => packet.packet_type === "FREE") && (
                                 <div className="flex items-center gap-1 text-green-600 text-sm bg-green-50 rounded-lg p-2">
@@ -140,20 +140,20 @@ const ConsultantCard = ({
                                 })()}
                             </div>
                         </div>
-                 </div>
+                    </div>
 
-                    <div className="mt-4 flex items-center justify-between">
-                        <div className="flex gap-2">
+                    <div className="mt-4 w-full md:w-auto flex flex-col md:flex-col items-center justify-center md:justify-end gap-2">
+                        <div className="flex gap-2 w-full md:w-auto">
                             {isOnline && (
                                 <Link 
                                     href={`/danisman/${slug}`}
-                                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium">
+                                    className="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium text-center">
                                     Hemen Görüş
                                 </Link>
                             )}
                             <Link 
                                 href={`/danisman/${slug}`}
-                                className="bg-[#2D4D77] hover:bg-[#1e3557] text-white py-2 px-4 rounded-lg text-sm font-medium text-center">
+                                className="flex-1 md:flex-none bg-[#2D4D77] hover:bg-[#1e3557] text-white py-2 px-4 rounded-lg text-sm font-medium text-center">
                                 Randevu Al
                             </Link>
                         </div>
@@ -168,7 +168,7 @@ interface ConsultantSectionProps {
     consultants: any[];
 }
 
-export default function ConsultantSection({ consultants }: ConsultantSectionProps) {
+export default function ConsultantSectionForSearch({ consultants }: ConsultantSectionProps) {
     return (
         <section className="py-8">
             <div className="container mx-auto">
@@ -192,13 +192,26 @@ export default function ConsultantSection({ consultants }: ConsultantSectionProp
                     <div className="md:col-span-1">
                         <FilterSection/>  
                     </div>
-                    <div className="md:col-span-3">
-                        <div className="flex flex-col gap-4">
-                            {consultants.map((consultant, index) => (
-                                <ConsultantCard key={index} {...consultant} />
-                            ))}
-                        </div>
-                    </div>
+                                <div className="md:col-span-3">
+                                <div className="flex justify-between items-center">
+                                        <h2 className="text-xl font-semibold mb-4">Danışmanlarımız</h2>
+                                        <p className="text-sm text-gray-500">
+                                            {consultants.length} danışman bulundu
+                                        </p>
+                                </div>
+                                    <div className="flex flex-col gap-4">
+                                        {consultants.length > 0 ? consultants.map((consultant, index) => (
+                                            <ConsultantCard key={index} {...consultant} />
+                                        )) :
+                                        (
+                                            <div className="flex items-center justify-center min-h-[400px]">
+                                                <p>Arama sonuçları bulunamadı</p>
+                                            </div>
+                                                                                )
+                                    
+                                    }
+                                    </div>
+                                </div>
                 </div>
             </div>
         </section>

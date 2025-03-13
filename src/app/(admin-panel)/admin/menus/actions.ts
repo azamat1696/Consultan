@@ -81,8 +81,7 @@ export async function updateMenu(id: number, data: any) {
         type: data.type,
         page_path: data.page_path,
         order_number: data.order_number,
-        parentId: data.parentId,
-        categoryId: data.categoryId,
+        parentId: data.parentId
       }
       });
 

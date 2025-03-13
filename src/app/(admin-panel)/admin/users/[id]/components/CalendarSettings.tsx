@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
 import { Info } from 'lucide-react';
-import { saveWeeklyCalendar, getWeeklyCalendar } from '../action';
+import { saveWeeklyCalendar, getWeeklyCalendar } from '../actions';
 import { useParams } from 'next/navigation';
 
 const formSchema = z.object({

@@ -22,7 +22,7 @@ model User {
   phone                       String?
   profile_image               String?
   latest_time_for_appointment Int?
-  description                 String?
+  description                 String?  @db.LongText
   check_up_status             String?  @map("check_up_status")
   status                      Boolean
   deletedAt                   DateTime?
@@ -260,12 +260,12 @@ enum MenuType {
 
 model Category {
   id        Int    @id @default(autoincrement())
-  menuId    Int
+  menuId    Int?
   title     String
   page_path String?
   slug      String?   @unique
   image     String?
-  menu      Menu      @relation("MenuCategories", fields: [menuId], references: [id], onDelete: Cascade)
+  menu      Menu?      @relation("MenuCategories", fields: [menuId], references: [id], onDelete: Cascade)
   categoryLinks CategoryWorkspaceLink[]
   expertiseLinks CategoryExpertiseLink[]
   parentMenus Menu[]  @relation("ParentMenu")

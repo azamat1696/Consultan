@@ -9,7 +9,7 @@ import {
 } from "@heroui/react";
 import { Info } from 'lucide-react';
 import toast from "react-hot-toast";
-import { saveMeetingOptions, getMeetingOptions } from '../action';
+import { saveMeetingOptions, getMeetingOptions } from '../actions';
 import { useParams } from 'next/navigation';
 
 const MEETING_PLATFORMS = [

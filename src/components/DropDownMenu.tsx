@@ -23,27 +23,19 @@ interface Menu {
 
 export default function DropDownMenu() {
     const [menus, setMenus] = useState<Menu[]>([]);
-    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+    const [hoveredMenuId, setHoveredMenuId] = useState<number | null>(null);
 
     useEffect(() => {
         getMenus().then(setMenus as any).catch(console.error);
     }, []);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (openMenuId && !(event.target as Element).closest('.menu-dropdown')) {
-                setOpenMenuId(null);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [openMenuId]);
-
-    const handleMenuClick = (menuId: number) => {
-        setOpenMenuId(openMenuId === menuId ? null : menuId);
+    const handleMouseEnter = (menuId: number) => {
+        setHoveredMenuId(menuId);
     };
-    console.log('menus',menus);
+
+    const handleMouseLeave = () => {
+        setHoveredMenuId(null);
+    };
 
     const renderMenuItem = (menu: Menu) => {
         // BlankPage type - direct link
@@ -59,42 +51,47 @@ export default function DropDownMenu() {
         if ((menu.type === "DropDown" && menu.children && menu.children?.length > 0)) {
         
             return (
-                <div className="relative group menu-dropdown transition-colors duration-300 ease-in-out hover:scale-105">
+                <div 
+                    className="menu-dropdown group"
+                    onMouseEnter={() => handleMouseEnter(menu.id)}
+                    onMouseLeave={handleMouseLeave}
+                >
                     <button
-                        className={`text-gray-700 hover:text-[#857B9E] font-medium py-2 ${openMenuId === menu.id ? 'text-[#857B9E]' : ''}`}
-                        onClick={() => handleMenuClick(menu.id)}
+                        className={`text-gray-700 hover:text-[#857B9E] font-medium py-2 transition-colors duration-300 ease-in-out hover:scale-105 ${hoveredMenuId === menu.id ? 'text-[#857B9E]' : ''}`}
                     >
                         {menu.title}
                     </button>
-                    {openMenuId === menu.id && (
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-[800px] bg-white shadow-lg rounded-lg p-6 grid grid-cols-3 gap-8 z-50 mt-2">
+                    {hoveredMenuId === menu.id && (
+                        <div className="absolute left-1/2 transform -translate-x-1/2 w-[800px] bg-white shadow-lg rounded-lg p-6 grid grid-cols-3 gap-8 z-50">
                             {menu.children?.map((child, index) => (
                                 <div key={child.id} className={`${index > 0 ? 'border-l pl-8' : ''}`}>
-                                    <span className="font-semibold text-gray-800 mb-1 border-b border-gray-800 pb-2 text-lg">
+                                    <span className="font-semibold text-gray-800 mb-1 border-b border-gray-800 pb-2 text-lg block">
                                         {child.title}
                                     </span>
-                                    {child.type === "BlankPage" && child.page_path ? (
-                                        <Link 
-                                            href={child.page_path}
-                                            className="text-gray-600 hover:text-[#857B9E]"
-                                        >
-                                            {child.title}
-                                        </Link>
-                                    ) : child.categories && (
-                                        
-                                            child.categories.map((category: Category) => (
-                                                <Link
-                                                    href={`/kategoriler/${category.slug}`}
-                                                    className="block py-2 text-gray-600 hover:text-[#857B9E] transition-colors"
-                                                >
-                                                    {category.title}
-                                                </Link>
-                                            ))
-                                        
-                                    )}
+                                    <div className="mt-4">
+                                        {child.type === "BlankPage" && child.page_path ? (
+                                            <Link 
+                                                href={child.page_path}
+                                                className="text-gray-600 hover:text-[#857B9E]"
+                                            >
+                                                {child.title}
+                                            </Link>
+                                        ) : child.categories && (
+                                            <div className="space-y-2">
+                                                {child.categories.map((category: Category) => (
+                                                    <Link
+                                                        key={category.id}
+                                                        href={`/kategoriler/${category.slug}`}
+                                                        className="block py-2 text-gray-600 hover:text-[#857B9E] transition-colors"
+                                                    >
+                                                        {category.title}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
-                           
                         </div>
                     )}
                 </div>

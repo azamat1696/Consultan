@@ -18,7 +18,7 @@ import { Info, Plus, Trash2, Edit } from 'lucide-react';
 import toast from "react-hot-toast";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { savePackets, getPackets } from '../action';
+import { savePackets, getPackets } from '../actions';
 import { useParams } from 'next/navigation';
 
 interface PacketType {

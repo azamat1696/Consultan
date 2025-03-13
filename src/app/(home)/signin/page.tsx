@@ -26,8 +26,13 @@ export default function LoginPage() {
             console.error("Giriş hatası:", error)
             toast.error("Giriş bilgilerinizi kontrol ediniz")
         }).then((response) => {
-             toast.success("Giriş başarılı")
-             router.push("/")
+            console.log("Giriş yapıldı", response)
+            if (response?.ok) {
+                toast.success("Giriş başarılı")
+                router.push("/")
+            } else {
+                toast.error("Giriş bilgilerinizi kontrol ediniz")
+            }
         });
     }
 

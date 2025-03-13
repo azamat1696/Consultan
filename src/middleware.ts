@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
-const publicRoutes = ['/signin','/sifre-sifirla','/sifremi-unuttum','/kayit-ol', '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*','/kategoriler/*','/nasil-calisiyor','/hakkimizda','/api']; // Define public routes
+const publicRoutes = ['/signin','/sifre-sifirla','/arama','/sifremi-unuttum','/kayit-ol', '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*','/kategoriler/*','/nasil-calisiyor','/hakkimizda','/api']; // Define public routes
 const roleBasedRoutes = {
     admin: ['/admin'],
     consultant: ['/consultant'],

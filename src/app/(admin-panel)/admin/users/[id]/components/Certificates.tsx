@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react';
 import toast from "react-hot-toast";
-import {deleteCertificate, getCertificates, updateCertificate,createCertificate} from '../action';
+import {deleteCertificate, getCertificates, updateCertificate,createCertificate} from '../actions';
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
