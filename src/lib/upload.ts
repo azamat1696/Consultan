@@ -7,7 +7,7 @@ const UPLOAD_DIR = process.env.NODE_ENV === 'development'
   : '/var/www/uploads';
   console.log('>>>>>>>',UPLOAD_DIR );
 
-export async function uploadImage(base64Image: string | File, type: string): Promise<string> {
+export async function uploadImage(base64Image: string | { arrayBuffer: () => Promise<ArrayBuffer>, name: string }, type: string): Promise<string> {
    try {
     // If it's already a URL, return it
     if (typeof base64Image === 'string' && !base64Image.startsWith('data:image')) {
@@ -17,8 +17,8 @@ export async function uploadImage(base64Image: string | File, type: string): Pro
     let buffer: Buffer;
     let extension = 'png';
 
-    if (base64Image instanceof File) {
-      // Handle File object
+    if (typeof base64Image === 'object' && 'arrayBuffer' in base64Image) {
+      // Handle File-like object
       const arrayBuffer = await base64Image.arrayBuffer();
       buffer = Buffer.from(arrayBuffer);
       extension = base64Image.name.split('.').pop() || 'png';
