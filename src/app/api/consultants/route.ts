@@ -1,12 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db'; // Adjust the import based on your setup
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req?.url || '');
     const query = searchParams.get('query');
 
     if (!query || typeof query !== 'string') {
-        return res.status(400).json({ message: 'Invalid query parameter' });
+        return NextResponse.json({ message: 'Invalid query parameter' },{status:500})
     }
 
     try {
