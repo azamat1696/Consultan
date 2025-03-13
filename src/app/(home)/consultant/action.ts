@@ -12,6 +12,8 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { generateSlug } from "@/lib/slug";
 import { mkdir, writeFile } from 'fs/promises';
+import { uploadImage, deleteImage } from "@/lib/upload";
+ 
 
 interface Expertise {
     expertise_id: number;
@@ -67,6 +69,7 @@ export async function contactInfoRegister(formData: any) {
     let imageUrl = undefined;
     
     // Handle image upload
+    /*
     if (formData.image instanceof File) {
         try {
             // Create uploads directory if it doesn't exist
@@ -87,7 +90,11 @@ export async function contactInfoRegister(formData: any) {
             console.error('Error saving image:', error);
         }
     }
-
+   */
+    console.log(formData.image);
+    if (formData.image) {
+        imageUrl = await uploadImage(formData.image, 'users');
+    }
     // Hash password if it exists
     let hashedPassword = formData.password;
     if (formData.password) {
@@ -910,7 +917,7 @@ export async function getBillingInfo() {
         throw error;
     }
 }
-
+/*
 async function saveImage(base64Image: string): Promise<string> {
     try {
         const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
@@ -932,10 +939,10 @@ async function saveImage(base64Image: string): Promise<string> {
         throw error;
     }
 }
-
-export async function uploadImage(imageData: string) {
+*/
+export async function uploadImages(imageData: string) {
     try {
-        const imageUrl = await saveImage(imageData);
+        const imageUrl = await uploadImage(imageData,'users');
         return { success: true, url: imageUrl };
     } catch (error) {
         return { success: false, error: 'Image upload failed' };

@@ -52,6 +52,7 @@ export default function ContactInfo() {
     });
 
     const onSubmit = (data:any) => {
+        console.log(data);
         contactInfoRegister(data).then((res:any) => {
             if (res) {
                 setUser(res);

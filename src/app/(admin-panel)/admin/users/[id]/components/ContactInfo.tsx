@@ -8,7 +8,7 @@ import { Input,Button, Select, SelectItem } from "@heroui/react";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import React from "react";
-
+import { generateSlug } from "@/lib/slug";
 interface User {
     name: string;
     surname: string;
@@ -32,7 +32,6 @@ const formSchema = z.object({
         message: "Telefon numarası formatı geçersiz (905XXXXXXXXX)",
     }),
     image: z.any().optional(),
-    slug: z.string().min(2, { message: "Slug en az 2 karakter olmalıdır" }).optional()
 });
 const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E";
 
@@ -52,12 +51,13 @@ export default function ContactInfo() {
             title: '',
             phone: '',
             image: undefined,
-            slug: ''
         }
     });
+    console.log('errors',errors);
     const { id } = useParams();
     const idNumber = parseInt(id as string);
     const onSubmit = (data:any) => {
+        console.log('data');
         contactInfoRegister(data, idNumber ).then((res:any) => {
             if (res) {
                 setUser(res);
@@ -78,7 +78,6 @@ export default function ContactInfo() {
                     gender: res.gender || '',
                     title: res.title || '',
                     phone: res.phone || '',
-                    slug: res.slug || '',
                     image: res.profile_image || undefined
                 });
             }
@@ -157,6 +156,7 @@ export default function ContactInfo() {
                                                 className={`mt-1 w-full ${
                                                     errors.name ? "border-red-500" : "border-gray-300"
                                                 }`}
+                                            
                                             />
                                         )}
                                     />
@@ -182,6 +182,7 @@ export default function ContactInfo() {
                                                 className={`mt-1 w-full ${
                                                     errors.surname ? "border-red-500" : "border-gray-300"
                                                 }`}
+                                              
                                             />
                                         )}
                                     />
@@ -293,6 +294,7 @@ export default function ContactInfo() {
                                         <SelectItem key="admin" value="admin">Admin</SelectItem>
                                     </Select>
                                 </div>
+                       
                                 <Button type="submit" className="w-full bg-red-500 text-white">
                                     Kaydet
                                 </Button>

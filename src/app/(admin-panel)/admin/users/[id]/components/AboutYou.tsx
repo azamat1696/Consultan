@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Button, Textarea } from "@heroui/react";
-import remarkGfm from 'remark-gfm';
+import { Button } from "@heroui/react";
 import toast from "react-hot-toast";
 import { getContactInfo, updateDescription, uploadImages } from '../actions';
 import { useParams } from 'next/navigation';
@@ -30,7 +29,6 @@ async function loadSuggestions(text: string): Promise<Suggestion[]> {
 }
 */
 export default function AboutYou() {
-    const [preview, setPreview] = useState(false);
     const {id} = useParams();
     const idNumber = parseInt(id as string);
     const [value, setValue] = useState("");

@@ -5,10 +5,9 @@ import { getServerSession } from "next-auth";
 import {authOptions} from "@/lib/auth";
 import { PacketType } from '@prisma/client';
 import { createLog } from "@/lib/logger";
-import crypto from "crypto";
 import { hashPassword } from "@/lib/password";
-import { Session } from 'next-auth'
 import { uploadImage, deleteImage } from "@/lib/upload";
+import { generateSlug } from "@/lib/slug";
 
 interface Expertise {
     expertise_id: number;
@@ -59,12 +58,12 @@ export async function contactInfoRegister(formData: any, id: number) {
     });
     console.log('formData',formData);
     let imageUrl = undefined;
-    if (formData.image instanceof File) {
+    if (formData.image) {
         await deleteImage(currentUser?.profile_image || null, 'users');
     }
     console.log('currentUser?.profile_image',currentUser?.profile_image);
     // Handle image upload
-    if (formData.image instanceof File) {
+    if (formData.image) {
          imageUrl = await uploadImage(formData.image as any, 'users');
     }
 
@@ -86,7 +85,7 @@ export async function contactInfoRegister(formData: any, id: number) {
             password: hashedPassword,
             title: formData.title,
             phone: formData.phone,
-            slug: formData.slug,
+            slug: generateSlug(formData.name + ' ' + formData.surname),
             profile_image: imageUrl || formData.profile_image || undefined
         }
     });
@@ -944,6 +943,7 @@ export async function updateDescription(description: string, id: number) {
         if (!session) {
             redirect('/signin');
         }
+        console.log('description',description);
 
         const user = await prisma.user.update({
             where: {
@@ -1034,7 +1034,7 @@ export async function getBillingInfo(id: number) {
     }
 }
 
-
+ 
 export async function uploadImages(imageData: string) {
     try {
         const imageUrl = await uploadImage(imageData,'users');
@@ -1044,4 +1044,3 @@ export async function uploadImages(imageData: string) {
         return { success: false, error: 'Image upload failed' };
     }
 }
-
