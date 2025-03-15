@@ -7,14 +7,13 @@ export default function Footer(){
                 <div className="container mx-auto px-4">
                     <div className="flex flex-wrap justify-between items-start mb-8">
                         <div className="w-full text-center md:w-1/4 mb-6 md:mb-0">
-                            <a href="#" className="text-white font-bold text-lg bg-white rounded-full p-2">
-                               {/* <Image src="/assets/icons/logo.png" alt="Dancomy Logo" width={150} height={150} /> */}
-                                © 2023
+                            <a href="#" className="flex justify-center items-center">
+                                <Image src="/assets/icons/logo.png" alt="Dancomy Logo" width={150} height={150} /> 
                             </a>
                         </div>
 
                         <div className="w-full text-center md:w-2/4 grid grid-cols-1 gap-4 md:grid-cols-3 text-sm">
-                            <div>
+                           {/*  <div>
                                 <h3 className="font-semibold mb-2">Menü</h3>
                                 <ul className="space-y-2">
                                     <li><a href="#" className="hover:underline">Nasıl Çalışıyor?</a></li>
@@ -22,19 +21,18 @@ export default function Footer(){
                                     <li><a href="#" className="hover:underline">İletişim</a></li>
                                     <li><a href="#" className="hover:underline">Blog</a></li>
                                 </ul>
-                            </div>
+                            </div>*/}
                             <div>
-                                <h3 className="font-semibold mb-2">Hizmetler</h3>
                                 <ul className="space-y-2">
-                                    <li><a href="#" className="hover:underline">Kullanım Şartları</a></li>
-                                    <li><a href="#" className="hover:underline">Gizlilik Hakları ve KVKK</a></li>
-                                    <li><a href="#" className="hover:underline">Mesafeli Satış Sözleşmesi</a></li>
-                                    <li><a href="#" className="hover:underline">İade Süreci - Çerez Politikası</a></li>
+                                    <li><a href="/kullanim-sartlari" className="hover:underline">Kullanım Şartları</a></li>
+                                    <li><a href="/gizlilik-haklari-ve-kvkk" className="hover:underline">Gizlilik Hakları ve KVKK</a></li>
+                                    <li><a href="/mesafeli-satis-sozlesmesi" className="hover:underline">Mesafeli Satış Sözleşmesi</a></li>
+                                    <li><a href="/iade-sureci-cerez-politikasi" className="hover:underline">İade Süreci - Çerez Politikası</a></li>
                                 </ul>
                             </div>
                         </div>
 
-                        <div className="w-full md:w-1/4 text-center">
+                      {/*   <div className="w-full md:w-1/4 text-center">
                             <h3 className="font-semibold mb-2">Bizi Takip Edin</h3>
                             <div className="flex space-x-4 mb-4 justify-center">
                                 <a href="#" className="hover:opacity-80">
@@ -56,23 +54,12 @@ export default function Footer(){
                                     <img src="app-store-badge.png" alt="App Store" className="h-8"/>
                                 </a>
                             </div>
-                        </div>
+                        </div>*/}
                     </div>
 
-                    <div className="border-t border-white opacity-30 my-6"></div>
-                    <div className="text-sm text-white space-y-4 text-center">
-                        <p>
-                            <strong>Dikkat</strong> – Online terapi hizmeti, herkese uygun bir hizmet değildir.
-                            İntihar veya kendine zarar vermek gibi düşüncelere sahipseniz, sitedeki hizmetler size uygun
-                            olmayabilir. Bu durumdaysanız aşağıdaki yardım numaraları ile iletişime geçmenizi tavsiye
-                            ederiz:
-                        </p>
-                        <div className="flex justify-center items-center">
-                            <p className="space-x-1">
-                                Acil Yardım Hattı: <strong>112</strong>, Polis İmdat Hattı: <strong>155</strong>,
-                                Aile İçi Yardım Hattı: <strong>183</strong>,
-                                Uyuşturucu ile Mücadele Yardım Hattı: <strong>191</strong>
-                            </p>
+                    <div className="border-t border-gray-700 pt-4 mt-4">
+                        <div className="text-center text-sm text-gray-400">
+                            © {new Date().getFullYear()} Dancomy. Tüm hakları saklıdır.
                         </div>
                     </div>
                 </div>

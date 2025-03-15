@@ -55,7 +55,7 @@ export default function RegisterPage() {
        const data = await registerClient(formData)
        if (data) {
           toast.success("Kayıt başarılı bir şekilde gerçekleştirildi.")
-          return router.push('/login')
+          return router.push('/signin')
        }
     }
 
@@ -196,7 +196,7 @@ export default function RegisterPage() {
             <span className="text-sm text-gray-600">
               Zaten kayıtlı mısın?{" "}
                 <Link
-                    href="/login"
+                    href="/signin"
                     className="font-medium text-blue-600 hover:text-blue-800"
                 >
                 Giriş Yap
@@ -205,7 +205,7 @@ export default function RegisterPage() {
                     </div>
                 </form>
 
-                {/* Sosyal Medya ile Kayıt */}
+                {/* Sosyal Medya ile Kayıt 
                 <div className="mt-6">
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
@@ -215,10 +215,10 @@ export default function RegisterPage() {
               <span className="px-2 bg-white text-gray-500">
                 Veya şununla devam et
               </span>
-                        </div>
+                        </div> 
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-3">
+                   <div className="mt-6 grid grid-cols-2 gap-3">
                         <Button
                             type="button"
                             variant="outline"
@@ -248,6 +248,7 @@ export default function RegisterPage() {
                         </Button>
                     </div>
                 </div>
+                */}
             </div>
         </div>
     )

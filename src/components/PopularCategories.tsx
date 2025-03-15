@@ -58,7 +58,7 @@ export default function PopularCategories() {
 
                  <div className="mt-8 flex justify-center">
                     <button 
-                        className="bg-[#383242] text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-red-600 transition duration-150"
+                        className="bg-[#383242] text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-gray-700 transition duration-150"
                         onClick={handleShowAll}
                     >
                         Tüm Kategorileri Gör

@@ -115,7 +115,7 @@ export default function LoginPage() {
             <span className="text-sm text-gray-600">
               Hesabın yok mu?{" "}
                 <Link
-                    href="/register"
+                    href="/kayit-ol"
                     className="font-medium text-blue-600 hover:text-blue-800"
                 >
                 Kayıt Ol
