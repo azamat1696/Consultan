@@ -8,6 +8,7 @@ import {Autoplay, Navigation, Pagination, Thumbs} from "swiper/modules";
 import Image from "next/image";
 import {useState, useEffect} from "react";
 import { getActiveSliders } from "@/app/(home)/action";
+import Link from "next/link";
 
 interface Slider {
     id: number;
@@ -96,7 +97,7 @@ export default function Slider() {
                 >
                     {sliders.map((slider) => (
                         <SwiperSlide key={slider.id}>
-                            <div className="relative w-full h-full">
+                            <Link href={slider.description || ""} className="relative w-full h-full">
                                 <Image
                                     src={slider.mobileImage || slider.image || "/assets/images/default-slider.jpg"}
                                     alt={slider.title || ""}
@@ -117,7 +118,7 @@ export default function Slider() {
                                         {slider.description && <p className="text-xl">{slider.description}</p>}
                                     </div>
                                 )}
-                            </div>
+                            </Link>
                         </SwiperSlide>
                     ))}
                 </Swiper>

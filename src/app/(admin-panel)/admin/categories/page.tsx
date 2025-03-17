@@ -89,7 +89,7 @@ export default function CategoriesPage() {
   const fetchMenus = async () => {
     try {
       const data = await getMenus();
-      setMenus(data);
+      setMenus(data.filter((menu) => menu.type === "Relation"));
     } catch (error) {
       toast.error("Menüler yüklenirken bir hata oluştu");
     }

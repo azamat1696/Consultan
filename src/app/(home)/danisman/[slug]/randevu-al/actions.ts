@@ -1,5 +1,4 @@
-'use server'
-
+'use server' // TODO: Remove this ödeme sitemini test et
 import prisma from '@/lib/db'
 import { getSlug } from '@/lib/utils'
 import { stripe } from '@/lib/stripe'
@@ -14,6 +13,7 @@ interface AppointmentData {
     lastName: string
     email: string
     phone: string
+    amount: number
     notes?: string
 }
 
@@ -27,10 +27,19 @@ interface WeeklySchedule {
 }
 
 export async function createAppointment(data: AppointmentData) {
+    console.log('data',data)
     try {
-        // First, create or find the client
-        const client = await prisma.user.upsert({
+        // Check if client exists
+        const clientExists = await prisma.user.findUnique({
             where: {
+                email: data.email
+            }
+        })
+        let client = null
+        if (!clientExists) {
+            // First find the client
+            client = await prisma.user.upsert({
+                where: {
                 email: data.email
             },
             update: {
@@ -47,7 +56,8 @@ export async function createAppointment(data: AppointmentData) {
                 role: 'client',
                 slug: getSlug(data.firstName + " " + data.lastName)
             }
-        })
+            })
+        }
 
         // Get consultant data
         const consultant = await prisma.user.findUnique({
@@ -58,6 +68,11 @@ export async function createAppointment(data: AppointmentData) {
             throw new Error('Consultant not found')
         }
 
+        const clientId = clientExists?.id || client?.id;
+        if (!clientId) {
+            throw new Error('Client ID not found');
+        }
+
         // Format the date properly
         const appointmentDate = new Date(data.appointment_date)
         appointmentDate.setHours(0, 0, 0, 0)
@@ -66,11 +81,12 @@ export async function createAppointment(data: AppointmentData) {
         const appointment = await prisma.appointment.create({
             data: {
                 consultant_id: data.consultant_id,
-                client_id: client.id,
+                client_id: clientId,
                 packet_id: data.packet_id,
                 date_time: appointmentDate,
                 appointment_time: data.appointment_time,
-                status: 'pending'
+                status: 'pending',
+                amount: data.amount
             }
         })
 
@@ -163,6 +179,9 @@ export async function getConsultantCalendar(consultantId: number, date: string) 
 }
 
 export async function createCheckoutSession(appointmentData: AppointmentData, packet: any) {
+    console.log('appointmentData',appointmentData)
+    console.log('packet',packet)
+    return;
     try {
         // Check if payments are enabled
         if (process.env.ENABLE_PAYMENTS === 'false') {

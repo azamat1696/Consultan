@@ -191,6 +191,7 @@ model Appointment {
   client         User     @relation("ClientAppointments", fields: [client_id], references: [id])
   client_id      Int
   status         AppointmentStatus?
+  amount         Decimal?  @db.Decimal(10, 2) @default(0)
   deletedAt      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

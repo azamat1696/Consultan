@@ -123,7 +123,11 @@ export async function getMenus() {
                 children: {
                     where: { deletedAt: null },
                     include: {
-                        categories: true,
+                        categories: {
+                            where: {
+                                deletedAt: null
+                            }
+                        },
                         parent: true
                     }
                 },

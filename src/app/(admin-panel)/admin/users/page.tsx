@@ -103,7 +103,6 @@ export default function UsersTable() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
     try {
       if (editingUser) {
         
@@ -264,7 +263,7 @@ export default function UsersTable() {
           {users.map((user, index) => (
             <TableRow key={user.id}>
               <TableCell>{(meta.page - 1) * meta.pageSize + index + 1}</TableCell>
-              <TableCell>{`${user.name} ${user.surname}`}</TableCell>
+              <TableCell>{`${user.name || ''} ${user.surname || ''}`}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
                 <Chip color={user.role === 'admin' ? 'danger' : user.role === 'consultant' ? 'warning' : 'primary'}>

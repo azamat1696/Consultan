@@ -20,12 +20,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Dancomy: Online Psikolog, Aile Danışmanı, Pedagog ve Diyetisyen",
+    title: {
+      default:"Dancomy",
+      template:"%s | Online danışmanlık"
+    },
     description: "Dancomy: Online Psikolog, Aile Danışmanı, Pedagog, Astrolog, Diyetisyen",
     keywords: "online psikolog, online aile danışmanı, online pedagog, online astrolog, online diyetisyen",
     applicationName: "Dancomy",
+    
 };
-
 
 export default function RootLayout({
   children,

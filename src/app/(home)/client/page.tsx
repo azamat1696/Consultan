@@ -1,9 +1,22 @@
-export default function Page(){
+import GeneralInfo from "./components/GeneralInfo";
+import Orders from "./components/Orders";
+import PasswordReset from "./components/PasswordReset";
+
+export default function Page() {
     return (
-        <div className="min-h-screen flex items-start justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-md">
-                <h1>Client Page</h1>
+        <div className="container mx-auto px-4 py-8 h-screen">
+            <div className="flex flex-col lg:flex-row gap-8">
+                {/* Genel Bilgiler - 30% width */}
+                <div className="lg:w-[30%]">
+                    <GeneralInfo />
+                </div>
+
+                {/* Siparişlerim ve Şifre Yenileme - 70% width */}
+                <div className="lg:w-[70%] space-y-8">
+                    <Orders />
+                    <PasswordReset />
+                </div>
             </div>
         </div>
-    )
+    );
 }

@@ -19,20 +19,22 @@ export async function getSearchResults(filters: SearchFilters) {
       status: true,
       deletedAt: null,
       role: "consultant",
-      OR: [
-        { name: { contains: keyword } },
-        { surname: { contains: keyword } },
-        { title: { contains: keyword } },
-        {
-          consultantExpertiseLinks: {
-            some: {
-              expertise: {
-                name: { contains: keyword }
+      ...(keyword ? {
+        OR: [
+          { name: { contains: keyword } },
+          { surname: { contains: keyword } },
+          { title: { contains: keyword } },
+          {
+            consultantExpertiseLinks: {
+              some: {
+                expertise: {
+                  name: { contains: keyword }
+                }
               }
             }
           }
-        }
-      ]
+        ]
+      } : {})
     };
     
     // Add gender filter if specified

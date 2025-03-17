@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 const publicRoutes = ['/signin','/sifre-sifirla','/arama','/sifremi-unuttum','/kayit-ol',
      '/about','/','/unauthorized','/logout','/danisman/kayit-ol','/psikoloji','/danisman/*',
      '/kategoriler/*','/nasil-calisiyor','/hakkimizda','/api',
+     '/on-bilgilendirme','/mesafeli-satis',
      '/kullanim-sartlari','/gizlilik-haklari-ve-kvkk','/mesafeli-satis-sozlesmesi','/iade-sureci-cerez-politikasi']; // Define public routes
 const roleBasedRoutes = {
     admin: ['/admin'],

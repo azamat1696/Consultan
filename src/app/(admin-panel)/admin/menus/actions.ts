@@ -7,12 +7,21 @@ export async function getMenus() {
     const data = await prisma.menu.findMany({
       orderBy: [
         { order_number: 'asc' },
-        { createdAt: 'desc' }
+        { createdAt: 'desc' },
+        { order_number: 'desc' }
       ],
       include: {
         parent: true,
-        category: true,
-        categories: true
+        category: {
+          where: {
+            deletedAt: null
+          }
+        },
+        categories: {
+          where: {
+            deletedAt: null
+          }
+        }
       },
       where: {
         deletedAt: null

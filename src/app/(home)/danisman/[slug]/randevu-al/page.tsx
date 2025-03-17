@@ -100,31 +100,46 @@ export default function AppointmentPage() {
                 lastName: formData.lastName,
                 email: formData.email,
                 phone: formData.phone,
-                notes: formData.notes
+                notes: formData.notes,
+                amount: selectedPacket?.packet_type === 'FREE' ? 0 : selectedPacket?.price
             }
 
-            if (selectedPacket.price > 0) {
+            console.log('Selected Packet:', selectedPacket);
+            console.log('Appointment Data:', appointmentData);
+
+            // Check if it's a paid appointment
+            if (selectedPacket?.packet_type !== 'FREE' && selectedPacket?.price > 0) {
+                console.log('Creating checkout session for paid appointment');
                 const checkoutResult = await createCheckoutSession(appointmentData, selectedPacket)
+                console.log('Checkout Result:', checkoutResult);
                 
+                if (!checkoutResult) {
+                    throw new Error('Ödeme oturumu oluşturulamadı')
+                }
+
                 if (!checkoutResult.success) {
-                    throw new Error(checkoutResult.error)
+                    throw new Error(checkoutResult.error || 'Ödeme oturumu oluşturulamadı')
                 }
 
                 if (checkoutResult.skipPayment) {
-                    // Payment was skipped, appointment was created directly
                     toast.success('Randevu başarıyla oluşturuldu')
                     router.push(`/danisman/${params.slug}`)
                     return
                 }
 
+                if (!checkoutResult.url) {
+                    throw new Error('Ödeme sayfası URL\'i oluşturulamadı')
+                }
+
                 // Redirect to Stripe checkout
-                window.location.href = checkoutResult.url!
+                window.location.href = checkoutResult.url
             } else {
+                console.log('Creating free appointment');
                 // Free appointment - create directly
                 const result = await createAppointment(appointmentData)
 
                 if (!result.success) {
-                    throw new Error(result.error)
+                    throw new Error(result.error || 'Randevu oluşturulamadı')
                 }
                 
                 toast.success('Randevu başarıyla oluşturuldu')
@@ -132,7 +147,7 @@ export default function AppointmentPage() {
             }
         } catch (error) {
             console.error('Error:', error)
-            toast.error('Bir hata oluştu')
+            toast.error(error instanceof Error ? error.message : 'Bir hata oluştu')
         }
     }
 

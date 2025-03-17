@@ -170,25 +170,29 @@ export default function MenusPage() {
               <TableCell>{menu.parent?.title || "-"}</TableCell>
               <TableCell>
                 
-                  <div>
-                    <Button
-                      variant="light"
-                      size="sm"
-                      endContent={expandedMenuId === menu.id ? <ChevronUp /> : <ChevronDown />}
-                      onPress={() => handleToggleCategories(menu.id)}
-                    >
-                      {`${menu.categories?.length || 0} kategori`}
-                    </Button>
-                    {expandedMenuId === menu.id && menu.categories && menu.categories.length > 0 && (
-                      <div className="mt-2 pl-4 space-y-1">
-                        {menu.categories.map((category, index) => (
-                          <div key={index} className="text-sm text-gray-600">
-                            {category.title}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+               {
+                 menu.type === "Relation" && (
+                      <div>
+                      <Button
+                        variant="light"
+                        size="sm"
+                        endContent={expandedMenuId === menu.id ? <ChevronUp /> : <ChevronDown />}
+                        onPress={() => handleToggleCategories(menu.id)}
+                      >
+                        {`${menu.categories?.length || 0} kategori`}
+                      </Button>
+                      { expandedMenuId === menu.id && menu.categories && menu.categories.length > 0 && (
+                        <div className="mt-2 pl-4 space-y-1">
+                          {menu.categories.map((category, index) => (
+                            <div key={index} className="text-sm text-gray-600">
+                              {category.title}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                 )
+               }
                 
               </TableCell>
               <TableCell>

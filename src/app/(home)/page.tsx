@@ -6,6 +6,7 @@ import {
     faVideoCamera
 } from "@fortawesome/free-solid-svg-icons";
 import {faCheckCircle, faComment, faCreditCard} from "@fortawesome/free-regular-svg-icons";
+
 export default async function Home() {
   return (
       <>

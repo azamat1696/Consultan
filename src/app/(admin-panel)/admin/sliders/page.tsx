@@ -242,14 +242,14 @@ export default function SlidersPage() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
-              <Textarea
-                label="Açıklama"
+              <Input
+                label="Ürün Linki"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
               <Input
                 type="file"
-                label="Görsel"
+                label="Görsel (1800x600)"
                 accept="image/*"
                 onChange={(e) => handleImageChange(e, 'image')}
               />
@@ -266,7 +266,7 @@ export default function SlidersPage() {
               )}
               <Input
                 type="file"
-                label="Mobil Görsel"
+                label="Mobil Görsel (345x388)"
                 accept="image/*"
                 onChange={(e) => handleImageChange(e, 'mobileImage')}
               />

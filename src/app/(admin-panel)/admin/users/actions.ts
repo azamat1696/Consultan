@@ -40,7 +40,13 @@ export async function getUsers(params: GetUsersParams = { search: "", role: null
   try {
     const where = {
       deletedAt: null,
-      name: { contains: params.search },
+      ...(params.search ? {
+        OR: [
+          { name: { contains: params.search } },
+          { email: { contains: params.search } },
+          { surname: { contains: params.search } }
+        ]
+      } : {}),
       ...(params.role && { role: params.role }),
     };
 
@@ -53,7 +59,6 @@ export async function getUsers(params: GetUsersParams = { search: "", role: null
       }),
       prisma.user.count({ where }),
     ]);
-
     return { data, count };
   } catch (error) {
     console.error('Error fetching users:', error);

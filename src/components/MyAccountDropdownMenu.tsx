@@ -12,7 +12,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {faSignOut} from "@fortawesome/free-solid-svg-icons/faSignOut";
 
 export function MyAccountDropdownMenu() {
@@ -47,7 +47,7 @@ export function MyAccountDropdownMenu() {
                                 <FontAwesomeIcon icon={faUser} color="#35303E" />
                                 <span className="text-gray-500 font-bold text-md">Hesabım</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push("/logout")}>
+                            <DropdownMenuItem onClick={() => signOut()}>
                                 <FontAwesomeIcon icon={faSignOut} color="#35303E" />
                                 <span className="text-gray-500 font-bold text-md">Çıkış Yap</span>
                             </DropdownMenuItem>
