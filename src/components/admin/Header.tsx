@@ -9,6 +9,7 @@ import { useState } from 'react';
 const MAIN_MENU_ITEMS = [
     { href: '/admin', label: 'Dashboard' },
     { href: '/admin/users', label: 'Kullanıcılar' },
+    { href: '/admin/rezervasyonlar', label: 'Rezervasyonlar' },
 ];
 
 const CONTENT_MANAGEMENT_ITEMS = [

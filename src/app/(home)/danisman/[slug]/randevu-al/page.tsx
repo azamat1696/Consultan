@@ -104,14 +104,9 @@ export default function AppointmentPage() {
                 amount: selectedPacket?.packet_type === 'FREE' ? 0 : selectedPacket?.price
             }
 
-            console.log('Selected Packet:', selectedPacket);
-            console.log('Appointment Data:', appointmentData);
-
             // Check if it's a paid appointment
             if (selectedPacket?.packet_type !== 'FREE' && selectedPacket?.price > 0) {
-                console.log('Creating checkout session for paid appointment');
                 const checkoutResult = await createCheckoutSession(appointmentData, selectedPacket)
-                console.log('Checkout Result:', checkoutResult);
                 
                 if (!checkoutResult) {
                     throw new Error('Ödeme oturumu oluşturulamadı')

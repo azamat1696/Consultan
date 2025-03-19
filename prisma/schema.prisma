@@ -192,6 +192,7 @@ model Appointment {
   client_id      Int
   status         AppointmentStatus?
   amount         Decimal?  @db.Decimal(10, 2) @default(0)
+  notes          String?   @db.Text
   deletedAt      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -231,6 +232,7 @@ enum PacketType {
 
 enum AppointmentStatus {
   pending
+  approved
   cancelled
   completed
 }

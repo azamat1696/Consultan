@@ -1,4 +1,3 @@
-'use server' // TODO: Remove this ödeme sitemini test et
 import prisma from '@/lib/db'
 import { getSlug } from '@/lib/utils'
 import { stripe } from '@/lib/stripe'
@@ -86,6 +85,7 @@ export async function createAppointment(data: AppointmentData) {
                 date_time: appointmentDate,
                 appointment_time: data.appointment_time,
                 status: 'pending',
+                notes: data.notes,
                 amount: data.amount
             }
         })

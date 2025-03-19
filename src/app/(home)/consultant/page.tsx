@@ -26,7 +26,7 @@ export default function Page() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     return (
-        <div className="flex flex-col md:flex-row gap-4 p-4">
+        <div className="flex flex-col md:flex-row gap-4 p-4 h-screen container mx-auto">
             {/* Mobile Menu Button */}
             <Button 
                 className="md:hidden mb-4" 
@@ -58,42 +58,9 @@ export default function Page() {
                                 <Home className="w-5 h-5" />
                                 <span>Anasayfa</span>
                             </Link>
-                            <Link href="/consultant/calendar" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <Calendar className="w-5 h-5" />
-                                <span>Takvimim</span>
-                            </Link>
-                            <Link href="/consultant/consultants" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <Users className="w-5 h-5" />
-                                <span>Danışanlarım</span>
-                            </Link>
-                            <Link href="/consultant/packages" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <Package className="w-5 h-5" />
-                                <span>Paket Satışlarım</span>
-                            </Link>
-                            <Link href="/consultant/profile" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <User className="w-5 h-5" />
-                                <span>Profilim</span>
-                            </Link>
-                            <Divider />
                             <Link href="/consultant/appointments" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
                                 <Clock className="w-5 h-5" />
                                 <span>Randevularım</span>
-                            </Link>
-                            <Link href="/consultant/messages" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <MessageSquare className="w-5 h-5" />
-                                <span>Mesajlar</span>
-                            </Link>
-                            <Link href="/consultant/orders" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <ShoppingCart className="w-5 h-5" />
-                                <span>Siparişlerim</span>
-                            </Link>
-                            <Link href="/consultant/notifications" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <Bell className="w-5 h-5" />
-                                <span>Bildirim Ayarlarım</span>
-                            </Link>
-                            <Link href="/consultant/settings" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
-                                <Settings className="w-5 h-5" />
-                                <span>Ayarlar</span>
                             </Link>
                             <Link href="/consultant/support" className="flex items-center gap-2 p-2 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors">
                                 <HelpCircle className="w-5 h-5" />
@@ -119,7 +86,9 @@ export default function Page() {
                         selectedKeys={[activeSection]}
                         onSelectionChange={(keys) => {
                             const key = Array.from(keys)[0];
-                            setActiveSection(key.toString());
+                            if (key) {
+                                setActiveSection(key.toString());
+                            }
                         }}
                     >
                         <AccordionItem key="1" title="İletişim Bilgileri">
